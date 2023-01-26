@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "290367213682",
+    "project_id": "zavrsnirad-1e613",
+    "storage_bucket": "zavrsnirad-1e613.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290367213682:android:166398fbee2ea1efab72eb",
+        "android_client_info": {
+          "package_name": "com.example.zavrsnirad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "290367213682-2j9nccqv2le9p3mks8088o35cl13amh1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJr84Z0WxB2jvIZ6w3fKUMuigvXkNFKiM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "290367213682-2j9nccqv2le9p3mks8088o35cl13amh1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
