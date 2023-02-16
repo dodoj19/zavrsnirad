@@ -8,17 +8,15 @@ import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -26,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -147,8 +147,27 @@ class HomeScreen : ComponentActivity() {
     @Composable
     fun ShowColumn(data: UserModel) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceAround
         ){
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(48.dp)
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.End
+            ){
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        Icons.Filled.AccountCircle,
+                        null,
+                        Modifier.size(48.dp),
+                        Color.DarkGray
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -157,12 +176,12 @@ class HomeScreen : ComponentActivity() {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(180.dp)
+                        .size(140.dp)
                 ){
                     Text(
                         modifier = Modifier
                             .padding(horizontal = 15.dp, vertical = 10.dp),
-                        fontSize = 42.sp,
+                        fontSize = 38.sp,
                         fontWeight = FontWeight.Normal,
                         color = NormalText,
                         text = "Welcome back! ${data.userName}",
@@ -216,25 +235,6 @@ class HomeScreen : ComponentActivity() {
                                 color = Color.Black,
                             )
 
-                            /*
-
-                            OutlinedButton(
-                                modifier = Modifier.size(50.dp),
-                                border = BorderStroke(3.dp, Color.DarkGray),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
-                                onClick = { /*TODO*/ }
-                            ) {
-                                Text(
-                                    text = "+",
-                                    color = Color.DarkGray,
-                                    fontSize = 25.sp,
-                                    fontWeight = FontWeight.W900
-                                )
-                            }
-
-                            */
-
                             OutlinedButton(
                                 modifier = Modifier.size(height= 40.dp, width = 100.dp),
                                 border = BorderStroke(2.dp, Color.DarkGray),
@@ -276,13 +276,15 @@ class HomeScreen : ComponentActivity() {
                 ){
 
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
                         verticalArrangement = Arrangement.Center
                     ){
 
                         Text(
                             modifier = Modifier
-                                .padding(10.dp),
+                                .padding(0.dp),
                             text = "Spending",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
@@ -290,7 +292,7 @@ class HomeScreen : ComponentActivity() {
                         )
                         Text(
                             modifier = Modifier
-                                .padding(10.dp),
+                                .padding(5.dp),
                             text = "This month",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.W600,
@@ -336,7 +338,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(220.dp)
+                        .requiredHeight(320.dp)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -356,14 +358,24 @@ class HomeScreen : ComponentActivity() {
                             verticalAlignment = Alignment.CenterVertically
                         ){
 
-                            Text(
-                                modifier = Modifier
-                                    .padding(5.dp),
-                                text = "Transactions",
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = NormalText,
-                            )
+                            Column(){
+                                Text(
+                                    modifier = Modifier
+                                        .padding(0.dp),
+                                    text = "Transactions",
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = NormalText,
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .padding(5.dp),
+                                    text = "Latest",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.W600,
+                                    color = NormalText,
+                                )
+                            }
 
                             OutlinedButton(
                                 modifier = Modifier,
@@ -413,6 +425,63 @@ class HomeScreen : ComponentActivity() {
                                     .background(color = BGGray, RoundedCornerShape(12.dp)),
                             ){
 
+                                val transactions = data.userTransactionHistory
+
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    userScrollEnabled = false
+                                ){
+
+                                    item{
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .padding(10.dp)
+                                                .background(Color.White, RoundedCornerShape(12.dp)),
+                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Column(
+                                                Modifier.padding(5.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ){
+                                                Image(
+                                                    painter = painterResource(id = R.drawable.splash_logo),
+                                                    null,
+                                                    Modifier.size(60.dp),
+                                                )
+                                                Text(
+                                                    text = "CATEGORY",
+                                                    modifier = Modifier,
+                                                    color = Color.LightGray,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.W900
+                                                )
+                                            }
+
+                                            Column(
+                                                Modifier.padding(10.dp)
+                                            ){
+                                                Text(
+                                                    text = "-3.0€",
+                                                    modifier = Modifier,
+                                                    color = Color.Red,
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.W900
+                                                )
+                                                Text(
+                                                    text = "DESCRIPTION",
+                                                    modifier = Modifier,
+                                                    color = Color.DarkGray,
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.W900
+                                                )
+                                                Text("12/21/2023")
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
