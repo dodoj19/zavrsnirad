@@ -9,20 +9,28 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -179,28 +187,75 @@ class HomeScreen : ComponentActivity() {
                 ){
 
                     Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceAround
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.SpaceEvenly
                     ){
 
                         Text(
-                            modifier = Modifier
-                                .padding(10.dp),
+                            modifier = Modifier,
                             text = "Your balance",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
                             color = NormalText,
                         )
 
-                        Text(
+                        Row(
                             modifier = Modifier
-                                .padding(10.dp)
-                                .weight(0.8f),
-                            text = data.userBalance.toString() + "€",
-                            fontSize = 52.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black,
-                        )
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.Bottom
+                        ){
+                            Text(
+                                modifier = Modifier
+                                    .weight(0.8f),
+                                text = data.userBalance.toString() + "€",
+                                fontSize = 52.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Black,
+                            )
+
+                            /*
+
+                            OutlinedButton(
+                                modifier = Modifier.size(50.dp),
+                                border = BorderStroke(3.dp, Color.DarkGray),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
+                                onClick = { /*TODO*/ }
+                            ) {
+                                Text(
+                                    text = "+",
+                                    color = Color.DarkGray,
+                                    fontSize = 25.sp,
+                                    fontWeight = FontWeight.W900
+                                )
+                            }
+
+                            */
+
+                            OutlinedButton(
+                                modifier = Modifier.size(height= 40.dp, width = 100.dp),
+                                border = BorderStroke(2.dp, Color.DarkGray),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
+                                onClick = { /*TODO*/ }
+                            ) {
+                                Text(
+                                    text = "NEW",
+                                    color = Color.DarkGray,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.W900
+                                )
+                                Icon(
+                                    Icons.Filled.Add,
+                                    null,
+                                    Modifier,
+                                    Color.DarkGray
+                                )
+                            }
+                        }
 
                     }
                 }
@@ -281,7 +336,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(180.dp)
+                        .requiredHeight(220.dp)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -293,24 +348,74 @@ class HomeScreen : ComponentActivity() {
                         verticalArrangement = Arrangement.Center
                     ) {
 
-                        Text(
+                        Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(10.dp),
-                            text = "Transactions",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = NormalText,
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            text = "This month",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = NormalText,
-                        )
-                    }
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
 
+                            Text(
+                                modifier = Modifier
+                                    .padding(5.dp),
+                                text = "Transactions",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = NormalText,
+                            )
+
+                            OutlinedButton(
+                                modifier = Modifier,
+                                border = BorderStroke(0.dp, Color.White),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = BGGray, contentColor = Color.LightGray),
+                                onClick = { /*TODO*/ }
+                            ) {
+                                Text(
+                                    text = "VIEW ALL",
+                                    modifier = Modifier,
+                                    color = Color.DarkGray,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+
+                                Spacer(Modifier.width(5.dp))
+
+                                Icon(
+                                    Icons.Filled.Search,
+                                    null,
+                                    Modifier,
+                                    Color.DarkGray
+                                )
+                            }
+
+                            /*
+                            ClickableText(
+                                modifier = Modifier
+                                    .padding(5.dp),
+                                text = AnnotatedString("VIEW ALL", paragraphStyle = ParagraphStyle(
+                                    TextAlign.Right, textDirection = TextDirection.Content)),
+                                onClick = {}
+                            )*/
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+
+                            Column(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .fillMaxSize()
+                                    .background(color = BGGray, RoundedCornerShape(12.dp)),
+                            ){
+
+                            }
+                        }
+                    }
                 }
             }
         }
