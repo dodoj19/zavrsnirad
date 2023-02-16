@@ -116,7 +116,7 @@ class SignupActivity : ComponentActivity() {
                         Toast.makeText(this, "Error ${err.message}", Toast.LENGTH_SHORT).show()
                     }
 
-                val transactionNew = TransactionModel("Kupnja u Mc Donaldsu", "Hrana", -3.0)
+                val transactionNew = TransactionModel("Kupnja u Mc Donaldsu", "Hrana", -3.0, Date().time.toString())
 
                 dbRef.child(user.uid).child("userTransactionHistory").child("Transaction").setValue(transactionNew)
                     .addOnCompleteListener {
