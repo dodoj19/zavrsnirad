@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Wallet</string>
-    <string name="app_version">DEVVER 1.1</string>
-    <string name="title_activity_edit_profile">EditProfile</string>
-    <string name="title_activity_terms_and_service">TermsAndServiceActivity</string>
+    <string name="app_version">Version 2.0</string>
+    <string name="terms_of_service">"
+        The App is designed to Users who track their records manually by entering their transactions in the App interface and based on those records, the App provides charts, overviews of information and advice, based on mathematical models.
+        The App is not designed and not able to be used as a tool which can accept or store any money or monetary equivalents, the App is not designed to perform any financial transactions or transfers; the App is read-only device. Users can also use advanced methods of data entering such as manual imports from xls or csv formats or automatic synchronization with their bank account.
+
+        Services are provided in the so-called Freemium model where a set of Services is free to use and allows to use the App to a certain extent which is covering basic needs of Users.
+
+        More advanced set of Services is enabled to its Users in Trial or Premium mode, which allows its Users automated or advanced functionalities. Services may be different for Users of different App platforms – Android, iOS and desktop (Website) – and are divided into Free features and Premium features.
+        Using the App may incur additional costs such as fees for the internet connection which shall be borne by Users."</string>
+    <string name="title_activity_no_connection">NoConnection</string>
+    <string name="title_activity_balance_change">BalanceChange</string>
 </resources>

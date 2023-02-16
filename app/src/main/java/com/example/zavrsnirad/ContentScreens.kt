@@ -3,19 +3,18 @@ package com.example.zavrsnirad
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.RoundedCorner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.R
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
@@ -35,21 +35,53 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.example.zavrsnirad.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 @Composable
 fun BalanceScreen(){
+
+    val mAuth = Firebase.auth;
+    val mDatabase = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/");
+    val mRef = mDatabase.getReference("Users");
+    val user = mAuth.currentUser;
+    var userData = UserModel();
+
+    mDatabase.getReference("Users").child(user!!.uid).get().addOnSuccessListener {ds ->
+
+        Log.w("Firebase", "Adding userName to the object")
+        userData.userName = ds.child("userName").value.toString();
+        userData.userBalance = ds.child("userName").value.toString().toDoubleOrNull();
+        userData.userId = user.uid;
+        userData.userGender = ds.child("userGender").value.toString();
+
+        //Log.i("Firebase", "User name is : ${userData.userName} ")
+    }.addOnFailureListener{
+        Log.e("Firebase", "Error getting data", it)
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxSize(),
         color = BGGray
     ){
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ){
 
@@ -59,15 +91,20 @@ fun BalanceScreen(){
             ){
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxWidth().size(160.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(160.dp)
                 ){
+                    Log.w("Firebase", "${userData.userName}, ${userData.userGender}")
+                    Log.w("Firebase", "String for username loaded")
+
                     Text(
                         modifier = Modifier
                             .padding(horizontal = 20.dp),
-                        text = "Welcome back, Dorijan!",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Normal,
                         color = NormalText,
+                        text = "Welcome back! ${userData.userName}"
                     )
                 }
 
@@ -86,6 +123,7 @@ fun BalanceScreen(){
                     elevation = 2.dp,
                     backgroundColor = White
                 ){
+
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center
@@ -103,11 +141,29 @@ fun BalanceScreen(){
                         Text(
                             modifier = Modifier
                                 .padding(10.dp),
-                            text = "$200.00",
+                            text = ((Math.random()*10000.0).roundToInt() / 100.0).toString() + "€",
                             fontSize = 45.sp,
                             fontWeight = FontWeight.Medium,
                             color = Black,
                         )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ){
+                            OutlinedButton(
+                                onClick = {},
+                                modifier = Modifier.padding(5.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    backgroundColor = BGGray,
+                                    contentColor = White,
+                                ),
+                                border = BorderStroke(0.dp, White)
+                            ) {
+                                Text("MODIFY", color = DarkGray, fontWeight = FontWeight.W900, fontSize = 17.sp)
+                            }
+                        }
                     }
                 }
             }
@@ -142,11 +198,11 @@ fun BalanceScreen(){
 
                         PieChart(
                             data = mapOf(
-                                Pair("String-1", 100),
-                                Pair("String-2", 150),
-                                Pair("String-3", 210),
-                                Pair("String-4", 430),
-                                Pair("String-5", 40),
+                                Pair("Food", 12),
+                                Pair("Shopping", 25),
+                                Pair("Taxi", 8),
+                                Pair("Subscriptions", 20),
+                                Pair("Dept", 30),
                             )
                         )
                     }
@@ -265,7 +321,7 @@ fun DeptsScreen(){
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(White)
             .wrapContentSize(Alignment.Center)
     ) {
 
@@ -287,10 +343,13 @@ fun ProfileScreen(){
     var gendertxt by remember {mutableStateOf("")}
     var passwordtxt by remember {mutableStateOf("")}
 
+    val mAuth = Firebase.auth;
+    val user = mAuth.currentUser;
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(White),
     ){
         Column(
             horizontalAlignment = Alignment.Start,
@@ -317,7 +376,7 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "NAME", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "NAME", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
                                 Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
                             }
@@ -326,7 +385,7 @@ fun ProfileScreen(){
                         if (usernametxt.text != "")
                             Text(text = usernametxt.text, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = "/", color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = user!!.email!!.split("@")[0], color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -338,7 +397,7 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "GENDER", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "GENDER", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
                                 Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
                             }
@@ -347,7 +406,7 @@ fun ProfileScreen(){
                         if (gendertxt != "")
                             Text(text = gendertxt, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = "/", color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = "Undefined", color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -359,7 +418,7 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "EMAIL", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "EMAIL", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
                                 Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
                             }
@@ -368,7 +427,7 @@ fun ProfileScreen(){
                         if (emailtxt.text != "")
                             Text(text = emailtxt.text, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = "/", color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = user!!.email!!.toString(), color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -380,13 +439,13 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "PASSWORD", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "PASSWORD", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
                                 Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.height(5.dp))
-                        Text(text = "*********", color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                        Text(text = "*********", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(45.dp))
@@ -405,10 +464,10 @@ fun ProfileScreen(){
                             },
                             colors = ButtonDefaults.outlinedButtonColors(
                                 backgroundColor = Color.hsl(5f, 0.00f, 0.20f, 1f),
-                                contentColor = Color.White
+                                contentColor = White
                             ),
                         ) {
-                            Text("LOG OUT", color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
+                            Text("LOG OUT", color = White, fontWeight = FontWeight.Black, fontSize = 28.sp)
                         }
                     }
 

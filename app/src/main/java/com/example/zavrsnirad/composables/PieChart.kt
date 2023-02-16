@@ -32,7 +32,7 @@ fun PieChart(
     animDuration: Int = 1000,
     ) {
 
-    val totalSum = data.values.sum();
+    val totalSum = data.values.sum()
     val floatValue = mutableListOf<Float>()
 
     data.values.forEachIndexed { index, values ->
@@ -165,7 +165,7 @@ fun DetailsPieChartItem(
                 )
                 Text(
                     modifier = Modifier.padding(start = 15.dp),
-                    text = "-" + data.second.toString() + " HRK",
+                    text = (data.second.toFloat()).toString() + "€",
                     fontWeight = FontWeight.Medium,
                     fontSize = 22.sp,
                     color = Color.Gray

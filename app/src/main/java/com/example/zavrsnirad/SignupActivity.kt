@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -36,25 +37,47 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.util.*
 
 class SignupActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var user: FirebaseUser
+    private lateinit var database: FirebaseDatabase
+    private lateinit var databaseUsers: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        onBackPressedDispatcher.addCallback(this ) {
+            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+        }
+
         auth = Firebase.auth
+        database = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
         setContent{
             DefaultPreview()
         }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)){view, insets ->
+            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            view.updatePadding(bottom = bottom)
+            insets
+        }
     }
 
-    private fun InitiateAccountCreation(email: String, password: String, passwordConfirm: String){
+    private fun initiateAccountCreation(email: String, password: String, passwordConfirm: String){
+        // Formation check
         if (email == ""){
             Toast.makeText(baseContext, "Your email must not be empty!", Toast.LENGTH_SHORT).show()
             return
@@ -77,24 +100,36 @@ class SignupActivity : ComponentActivity() {
 
         auth.createUserWithEmailAndPassword(email.replace(" ", ""), password.replace(" ", "")).addOnCompleteListener(this){ task ->
             if(task.isSuccessful){
-                // Sign in success, update UI with the signed-in user's information
-                Log.d("TESTINGTAG", "createUserWithEmail:success")
-                startActivity(Intent(this@SignupActivity, HomeScreen::class.java))
-                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
-                finishAfterTransition()
+
+                user = auth.currentUser!!
+
+                val dbRef = database.getReference("Users")
+                val userNew = UserModel(user.uid, user.email.toString().split("@")[0], 0.00, Date().time.toString(), "Null")
+
+                dbRef.child(user.uid).setValue(userNew)
+                    .addOnCompleteListener{
+                        startActivity(Intent(this@SignupActivity, HomeScreen::class.java))
+                        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                        finishAfterTransition()
+                    }
+                    .addOnFailureListener{err ->
+                        Toast.makeText(this, "Error ${err.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                val transactionNew = TransactionModel("Kupnja u Mc Donaldsu", "Hrana", -3.0)
+
+                dbRef.child(user.uid).child("userTransactionHistory").child("Transaction").setValue(transactionNew)
+                    .addOnCompleteListener {
+                        Toast.makeText(this, "Uspjesno dodano!", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener {err ->
+                        Toast.makeText(this, "Error ${err.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             else{
-                // If sign in fails, display a message to the user.
                 Log.w("TESTINGTAG", "createUserWithEmail:failure", task.exception)
                 Toast.makeText(baseContext, "An error while creating your account!", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    @Override
-    override fun onBackPressed() {
-        super.onBackPressed()
-        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
     }
 
     @Composable
@@ -222,7 +257,7 @@ class SignupActivity : ComponentActivity() {
 
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
-                        onClick = { InitiateAccountCreation(emailtxt.text, password, confirmPassword) },
+                        onClick = { initiateAccountCreation(emailtxt.text, password, confirmPassword) },
                     ){
 
                         Text(
@@ -257,7 +292,7 @@ class SignupActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .requiredHeight(60.dp)
                         .weight(1f, false)
-                        .background( color = Color.hsl(70f, 0f, 0.90f, 1f))
+                        .background(color = Color.hsl(70f, 0f, 0.90f, 1f))
                 ){
                     ClickableText(
                         text = buildAnnotatedString{
@@ -275,7 +310,10 @@ class SignupActivity : ComponentActivity() {
                             textAlign = TextAlign.Center,
                             color = Color.hsl(70f, 0f, 0.50f, 1f)
                         ),
-                        onClick = {}
+                        onClick = {
+                            startActivity(Intent(this@SignupActivity, TermsAndServices::class.java))
+                            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                        }
                     )
                 }
 

@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -17,17 +19,21 @@
         android:windowSoftInputMode="adjustPan"
         tools:targetApi="31">
         <activity
-            android:name=".TermsAndServiceActivity"
+            android:name=".BalanceChange"
             android:exported="false"
-            android:label="@string/title_activity_terms_and_service"
-            android:theme="@style/Theme.zavrsnirad">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:label="@string/title_activity_balance_change"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.zavrsnirad" />
+        <activity
+            android:name=".TermsAndServices"
+            android:exported="false"
+            android:label="Terms and Services"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.zavrsnirad" />
         <activity
             android:name=".ResetPassword"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -36,7 +42,8 @@
             android:name=".LoginActivity"
             android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -45,7 +52,8 @@
             android:name=".SignupActivity"
             android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

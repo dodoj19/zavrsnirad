@@ -276,7 +276,10 @@ class LoginActivity : ComponentActivity() {
                             textAlign = TextAlign.Center,
                             color = Color.hsl(70f, 0f, 0.50f, 1f)
                         ),
-                        onClick = {}
+                        onClick = {
+                            startActivity(Intent(this@LoginActivity, TermsAndServices::class.java))
+                            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                        }
                     )
                 }
 
