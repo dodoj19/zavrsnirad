@@ -36,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.zavrsnirad.sealed.DataState
 import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.ui.theme.NormalText
+import com.example.zavrsnirad.ui.theme.Purple500
 import com.example.zavrsnirad.viewmodels.HomeViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
@@ -99,9 +100,10 @@ class HomeScreen : ComponentActivity() {
     fun SetData(viewModel: HomeViewModel) {
         when(val result = viewModel.response.value){
             is DataState.Loading->{
-                Box(
+                Column(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ){
                     CircularProgressIndicator()
                 }
@@ -147,11 +149,11 @@ class HomeScreen : ComponentActivity() {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(170.dp)
+                        .size(180.dp)
                 ){
                     Text(
                         modifier = Modifier
-                            .padding(horizontal = 15.dp, vertical = 20.dp),
+                            .padding(horizontal = 15.dp, vertical = 10.dp),
                         fontSize = 42.sp,
                         fontWeight = FontWeight.Normal,
                         color = NormalText,
@@ -169,8 +171,8 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(210.dp)
-                        .padding(15.dp),
+                        .requiredHeight(180.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
                     backgroundColor = Color.White
@@ -185,7 +187,7 @@ class HomeScreen : ComponentActivity() {
                             modifier = Modifier
                                 .padding(10.dp),
                             text = "Your balance",
-                            fontSize = 34.sp,
+                            fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
                             color = NormalText,
                         )
@@ -195,12 +197,120 @@ class HomeScreen : ComponentActivity() {
                                 .padding(10.dp)
                                 .weight(0.8f),
                             text = data.userBalance.toString() + "€",
-                            fontSize = 55.sp,
+                            fontSize = 52.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.Black,
                         )
 
                     }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(330.dp)
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = 2.dp,
+                    backgroundColor = Color.White
+                ){
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center
+                    ){
+
+                        Text(
+                            modifier = Modifier
+                                .padding(10.dp),
+                            text = "Spending",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = NormalText,
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(10.dp),
+                            text = "This month",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.W600,
+                            color = NormalText,
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(15.dp),
+                            contentAlignment = Alignment.Center,
+
+                        ){
+                            val dataList = mutableListOf(450, 230, 549, 204, 659, 1023, 543, 154, 92, 543, 354)
+                            val floatValue = mutableListOf<Float>()
+                            val datesList = mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+
+                            dataList.forEachIndexed { index, value ->
+
+                                floatValue.add(index = index, element = value.toFloat()/dataList.max().toFloat())
+
+                            }
+
+                            BarGraph(
+                                graphBarData = floatValue,
+                                xAxisScaleData = datesList,
+                                barData_ = dataList,
+                                height = 140.dp,
+                                roundType = BarType.TOP_CURVED,
+                                barWidth = 15.dp,
+                                barColor = Purple500,
+                                barArrangement = Arrangement.SpaceEvenly
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(180.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = 2.dp,
+                    backgroundColor = Color.White
+                ){
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+
+                        Text(
+                            modifier = Modifier
+                                .padding(10.dp),
+                            text = "Transactions",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = NormalText,
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(10.dp),
+                            text = "This month",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = NormalText,
+                        )
+                    }
+
                 }
             }
         }
