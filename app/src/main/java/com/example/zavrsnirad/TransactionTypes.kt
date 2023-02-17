@@ -7,7 +7,14 @@ data class TransactionType(
     val categoryIconString: String,
     val backgroundColor: Color,
     val textBackgroundColor: Color
-)
+){
+    constructor() : this(
+        "",
+        "",
+        Color(0xFFFFFFFF),
+        Color(0xFFFFFFFF)
+    )
+}
 
 val transactionCategories = listOf(
     TransactionType("FOOD", "\uD83E\uDD59", Color(0xFFFF5D5D), Color(0xFFFF9C9C)),

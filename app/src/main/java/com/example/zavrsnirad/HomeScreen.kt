@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.zavrsnirad.sealed.DataState
+import com.example.zavrsnirad.ui.theme.AcceptButtonBG
 import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.ui.theme.NormalText
 import com.example.zavrsnirad.ui.theme.Purple500
@@ -35,6 +36,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Suppress("OverrideDeprecatedMigration")
 class HomeScreen : ComponentActivity() {
@@ -42,6 +45,9 @@ class HomeScreen : ComponentActivity() {
     private lateinit var mAuth: FirebaseAuth
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm:ss", Locale.ENGLISH)
+    fun getDateString(time: Long) : String = simpleDateFormat.format(time * 1000L)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -326,7 +332,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(320.dp)
+                        .requiredHeight(380.dp)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -415,17 +421,6 @@ class HomeScreen : ComponentActivity() {
 
                                 val transactions = data.userTransactionHistory!!.takeLast(2).reversed()
 
-                                /*
-                                val listForSort = mutableListOf<Long>()
-
-                                transactions!!.forEach{
-                                    listForSort.add(it.keys.iterator().next().toLong())
-                                }
-
-                                val sortedList = listForSort.sorted().takeLast(2).reversed()
-
-                                */
-
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     userScrollEnabled = false
@@ -435,11 +430,19 @@ class HomeScreen : ComponentActivity() {
                                         val hash = transactions.get(index)
                                         val hashData = hash.values.elementAt(0)
 
+                                        var currentTransactionType = TransactionType()
+
+                                        transactionCategories.forEach{type ->
+                                            if(type.name == hashData.transactionType!!){
+                                                currentTransactionType = type
+                                            }
+                                        }
+
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .wrapContentHeight()
-                                                .padding(10.dp)
+                                                .padding(5.dp)
                                                 .background(Color.White, RoundedCornerShape(12.dp)),
                                             horizontalArrangement = Arrangement.SpaceEvenly,
                                             verticalAlignment = Alignment.CenterVertically
@@ -448,38 +451,68 @@ class HomeScreen : ComponentActivity() {
                                                 Modifier.padding(5.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ){
-                                                Image(
-                                                    painter = painterResource(id = R.drawable.splash_logo),
-                                                    null,
-                                                    Modifier.size(60.dp),
+                                                Text(
+                                                    modifier = Modifier
+                                                        .padding(0.dp)
+                                                        .background(
+                                                            currentTransactionType.textBackgroundColor,
+                                                            RoundedCornerShape(12.dp)
+                                                        ),
+                                                    text = currentTransactionType.categoryIconString,
+                                                    fontSize = 60.sp,
+                                                    fontWeight = FontWeight.Light,
+                                                    color = Color.LightGray,
                                                 )
                                                 Text(
                                                     text = hashData.transactionType.toString(),
                                                     modifier = Modifier,
-                                                    color = Color.LightGray,
-                                                    fontSize = 13.sp,
+                                                    color = currentTransactionType.backgroundColor,
+                                                    fontSize = 20.sp,
                                                     fontWeight = FontWeight.W900
                                                 )
                                             }
 
                                             Column(
-                                                Modifier.padding(10.dp)
+                                                Modifier.padding(5.dp)
                                             ){
+                                                if (hashData.transactionValue!! <= 0){
+                                                    Text(
+                                                        text = hashData.transactionValue.toString() + "€",
+                                                        modifier = Modifier,
+                                                        color = Color.Red,
+                                                        fontSize = 25.sp,
+                                                        fontWeight = FontWeight.W900
+                                                    )
+                                                }
+                                                else{
+                                                    Text(
+                                                        text = "+"+hashData.transactionValue.toString() + "€",
+                                                        modifier = Modifier,
+                                                        color = AcceptButtonBG,
+                                                        fontSize = 25.sp,
+                                                        fontWeight = FontWeight.W900
+                                                    )
+                                                }
+
                                                 Text(
-                                                    text = "-3.0€",
-                                                    modifier = Modifier,
-                                                    color = Color.Red,
-                                                    fontSize = 15.sp,
-                                                    fontWeight = FontWeight.W900
-                                                )
-                                                Text(
-                                                    text = "DESCRIPTION",
+                                                    text = hashData.transactionName!!.toString(),
                                                     modifier = Modifier,
                                                     color = Color.DarkGray,
-                                                    fontSize = 15.sp,
+                                                    fontSize = 25.sp,
                                                     fontWeight = FontWeight.W900
                                                 )
-                                                Text("12/21/2023")
+
+
+                                                val formatter = SimpleDateFormat("dd.MM.yyyy hh:mm")
+                                                val dateString = formatter.format(Date(hashData.transactionDate!!.toLong()))
+
+                                                Text(
+                                                    text = dateString.toString(),
+                                                    modifier = Modifier,
+                                                    color = Color.LightGray,
+                                                    fontSize = 20.sp,
+                                                    fontWeight = FontWeight.W300
+                                                )
                                             }
                                         }
                                     }
