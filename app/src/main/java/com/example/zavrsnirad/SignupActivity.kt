@@ -116,14 +116,6 @@ class SignupActivity : ComponentActivity() {
                         Toast.makeText(this, "Error ${err.message}", Toast.LENGTH_SHORT).show()
                     }
 
-                val transactionNew = TransactionModel("Kupnja u Mc Donaldsu", "Hrana", -3.0, Date().time.toString())
-
-                dbRef.child(user.uid).child("userTransactionHistory").child("Transaction").setValue(transactionNew)
-                    .addOnCompleteListener {
-                        Toast.makeText(this, "Uspjesno dodano!", Toast.LENGTH_SHORT).show()
-                    }.addOnFailureListener {err ->
-                        Toast.makeText(this, "Error ${err.message}", Toast.LENGTH_SHORT).show()
-                    }
             }
             else{
                 Log.w("TESTINGTAG", "createUserWithEmail:failure", task.exception)

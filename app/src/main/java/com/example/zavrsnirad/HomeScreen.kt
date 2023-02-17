@@ -36,6 +36,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -216,10 +218,15 @@ class HomeScreen : ComponentActivity() {
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.Bottom
                         ){
+
+                            val df = DecimalFormat("#.##")
+                            df.roundingMode = RoundingMode.DOWN
+                            val roundoff = df.format(data.userBalance)
+
                             Text(
                                 modifier = Modifier
                                     .weight(0.8f),
-                                text = data.userBalance.toString() + "€",
+                                text = roundoff.toString() + "€",
                                 fontSize = 52.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.Black,
@@ -332,7 +339,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(380.dp)
+                        .requiredHeight(420.dp)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -419,11 +426,11 @@ class HomeScreen : ComponentActivity() {
                                     .background(color = BGGray, RoundedCornerShape(12.dp)),
                             ){
 
-                                val transactions = data.userTransactionHistory!!.takeLast(2).reversed()
+                                val transactions = data.userTransactionHistory!!.takeLast(5).reversed()
 
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    userScrollEnabled = false
+                                    userScrollEnabled = true
                                 ){
                                     items(transactions.size){index ->
 
