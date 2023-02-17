@@ -26,10 +26,10 @@ class HomeViewModel : ViewModel(){
     }
 
     private fun fetchDataFromDatabase() {
-        val mAuth = Firebase.auth;
-        val mDatabase = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/");
-        var tempModel = UserModel();
-        val user = mAuth.currentUser;
+        val mAuth = Firebase.auth
+        val mDatabase = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
+        var tempModel = UserModel()
+        val user = mAuth.currentUser
         response.value = DataState.Loading
 
         mDatabase.getReference("Users").child(user!!.uid).addListenerForSingleValueEvent(object: ValueEventListener{
@@ -48,8 +48,8 @@ class HomeViewModel : ViewModel(){
 
                     Log.d("DATABASE", snapshotKey!!)
                     Log.d("DATABASE", transaction!!.transactionName!!)
-                    Log.d("DATABASE", transaction!!.transactionType!!)
-                    Log.d("DATABASE", transaction!!.transactionValue!!.toString())
+                    Log.d("DATABASE", transaction.transactionType!!)
+                    Log.d("DATABASE", transaction.transactionValue!!.toString())
 
                     val hash = linkedMapOf(Pair(snapshotKey, transaction))
 

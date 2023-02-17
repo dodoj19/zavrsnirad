@@ -2,7 +2,6 @@ package com.example.zavrsnirad
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -20,12 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.example.zavrsnirad.sealed.DataState
 import com.example.zavrsnirad.ui.theme.AcceptButtonBG
 import com.example.zavrsnirad.ui.theme.BGGray
@@ -48,9 +45,6 @@ class HomeScreen : ComponentActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm:ss", Locale.ENGLISH)
-    fun getDateString(time: Long) : String = simpleDateFormat.format(time * 1000L)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,7 +59,6 @@ class HomeScreen : ComponentActivity() {
             systemUiController.setStatusBarColor(
                 color = BGGray
             )
-            val navController = rememberNavController()
 
             Scaffold(
                 topBar = {},
@@ -89,11 +82,6 @@ class HomeScreen : ComponentActivity() {
                 }
             }
         }
-    }
-
-    fun openBalanceChange(){
-        startActivity(Intent(this@HomeScreen, BalanceChange::class.java))
-        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
     }
 
     @Composable
@@ -359,7 +347,7 @@ class HomeScreen : ComponentActivity() {
                             verticalAlignment = Alignment.CenterVertically
                         ){
 
-                            Column(){
+                            Column {
                                 Text(
                                     modifier = Modifier
                                         .padding(0.dp),

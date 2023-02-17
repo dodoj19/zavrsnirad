@@ -136,7 +136,7 @@ fun BarGraph(
                 .padding(start = 50.dp)
                 .width(width - yAxisTextWidth)
                 .height(height + xAxisScaleHeight),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = BottomCenter
         ) {
 
             Row(

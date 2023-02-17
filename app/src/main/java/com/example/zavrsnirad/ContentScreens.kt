@@ -54,19 +54,19 @@ import kotlin.math.roundToInt
 @Composable
 fun BalanceScreen(){
 
-    val mAuth = Firebase.auth;
-    val mDatabase = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/");
-    val mRef = mDatabase.getReference("Users");
-    val user = mAuth.currentUser;
-    var userData = UserModel();
+    val mAuth = Firebase.auth
+    val mDatabase = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
+    val mRef = mDatabase.getReference("Users")
+    val user = mAuth.currentUser
+    var userData = UserModel()
 
     mDatabase.getReference("Users").child(user!!.uid).get().addOnSuccessListener {ds ->
 
         Log.w("Firebase", "Adding userName to the object")
-        userData.userName = ds.child("userName").value.toString();
-        userData.userBalance = ds.child("userName").value.toString().toDoubleOrNull();
-        userData.userId = user.uid;
-        userData.userGender = ds.child("userGender").value.toString();
+        userData.userName = ds.child("userName").value.toString()
+        userData.userBalance = ds.child("userName").value.toString().toDoubleOrNull()
+        userData.userId = user.uid
+        userData.userGender = ds.child("userGender").value.toString()
 
         //Log.i("Firebase", "User name is : ${userData.userName} ")
     }.addOnFailureListener{
@@ -343,8 +343,8 @@ fun ProfileScreen(){
     var gendertxt by remember {mutableStateOf("")}
     var passwordtxt by remember {mutableStateOf("")}
 
-    val mAuth = Firebase.auth;
-    val user = mAuth.currentUser;
+    val mAuth = Firebase.auth
+    val user = mAuth.currentUser
 
     Box(
         modifier = Modifier
@@ -361,7 +361,7 @@ fun ProfileScreen(){
                 .fillMaxSize()
         ){
 
-                Text(text = "Profile", color = Color.DarkGray, fontSize = 40.sp)
+                Text(text = "Profile", color = DarkGray, fontSize = 40.sp)
 
                 Spacer(Modifier.height(50.dp))
 
@@ -376,16 +376,16 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "NAME", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "NAME", color = DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
-                                Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Filled.ArrowForwardIos, null, tint = DarkGray, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.height(5.dp))
                         if (usernametxt.text != "")
-                            Text(text = usernametxt.text, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = usernametxt.text, color = DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = user!!.email!!.split("@")[0], color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
+                            Text(text = user!!.email!!.split("@")[0], color = DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -397,16 +397,16 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "GENDER", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "GENDER", color = DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
-                                Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Filled.ArrowForwardIos, null, tint = DarkGray, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.height(5.dp))
                         if (gendertxt != "")
-                            Text(text = gendertxt, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = gendertxt, color = DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = "Undefined", color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
+                            Text(text = "Undefined", color = DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -418,16 +418,16 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "EMAIL", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "EMAIL", color = DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
-                                Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Filled.ArrowForwardIos, null, tint = DarkGray, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.height(5.dp))
                         if (emailtxt.text != "")
-                            Text(text = emailtxt.text, color = Color.DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                            Text(text = emailtxt.text, color = DarkGray, fontSize = 18.sp, fontWeight = FontWeight.Normal)
                         else
-                            Text(text = user!!.email!!.toString(), color = Color.DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
+                            Text(text = user!!.email!!.toString(), color = DarkGray, fontSize = 16.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(35.dp))
@@ -439,13 +439,13 @@ fun ProfileScreen(){
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(text = "PASSWORD", color = Color.DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
+                            Text(text = "PASSWORD", color = DarkGray, fontSize = 25.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Start, modifier = Modifier.weight(1f))
                             IconButton(onClick = {}){
-                                Icon(Icons.Filled.ArrowForwardIos, null, tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Filled.ArrowForwardIos, null, tint = DarkGray, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.height(5.dp))
-                        Text(text = "*********", color = Color.DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Normal)
+                        Text(text = "*********", color = DarkGray, fontSize = 20.sp, fontWeight = FontWeight.Normal)
                     }
 
                     Spacer(Modifier.height(45.dp))

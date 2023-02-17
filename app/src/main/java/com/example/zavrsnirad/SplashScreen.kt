@@ -113,7 +113,7 @@ class SplashScreen : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        runActivityDetermineCheck();
+        runActivityDetermineCheck()
     }
 
     @Preview(showBackground = true, showSystemUi = true)
