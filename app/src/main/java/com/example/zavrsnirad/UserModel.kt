@@ -6,5 +6,5 @@ data class UserModel (
     var userBalance: Double? = null,
     var userJoin: String? = null,
     var userGender: String? = null,
-    var userTransactionHistory: MutableList<HashMap<String, TransactionModel>>? = null
+    var userTransactionHistory: MutableList<LinkedHashMap<String, TransactionModel>>? = null
 )

@@ -2,44 +2,29 @@ package com.example.zavrsnirad
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.addCallback
 import android.util.Log
-import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.zavrsnirad.sealed.DataState
 import com.example.zavrsnirad.ui.theme.BGGray
@@ -50,7 +35,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlin.math.roundToInt
 
 @Suppress("OverrideDeprecatedMigration")
 class HomeScreen : ComponentActivity() {
@@ -240,7 +224,11 @@ class HomeScreen : ComponentActivity() {
                                 border = BorderStroke(2.dp, Color.DarkGray),
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
-                                onClick = { /*TODO*/ }
+                                onClick = {
+                                    startActivity(Intent(this@HomeScreen, BalanceChange::class.java))
+                                    overridePendingTransition(com.google.android.material.R.anim.abc_popup_enter, com.google.android.material.R.anim.abc_popup_exit)
+                                    finishAfterTransition()
+                                }
                             ) {
                                 Text(
                                     text = "NEW",
@@ -425,14 +413,28 @@ class HomeScreen : ComponentActivity() {
                                     .background(color = BGGray, RoundedCornerShape(12.dp)),
                             ){
 
-                                val transactions = data.userTransactionHistory
+                                val transactions = data.userTransactionHistory!!.takeLast(2).reversed()
+
+                                /*
+                                val listForSort = mutableListOf<Long>()
+
+                                transactions!!.forEach{
+                                    listForSort.add(it.keys.iterator().next().toLong())
+                                }
+
+                                val sortedList = listForSort.sorted().takeLast(2).reversed()
+
+                                */
 
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     userScrollEnabled = false
                                 ){
+                                    items(transactions.size){index ->
 
-                                    item{
+                                        val hash = transactions.get(index)
+                                        val hashData = hash.values.elementAt(0)
+
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -452,7 +454,7 @@ class HomeScreen : ComponentActivity() {
                                                     Modifier.size(60.dp),
                                                 )
                                                 Text(
-                                                    text = "CATEGORY",
+                                                    text = hashData.transactionType.toString(),
                                                     modifier = Modifier,
                                                     color = Color.LightGray,
                                                     fontSize = 13.sp,

@@ -198,6 +198,7 @@ class SignupActivity : ComponentActivity() {
                             emailtxt = it
                         },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         label = { Text(text = "Email address") },
                         placeholder = { Text(text = "Enter your e-mail") },
                         modifier = Modifier.padding(5.dp)

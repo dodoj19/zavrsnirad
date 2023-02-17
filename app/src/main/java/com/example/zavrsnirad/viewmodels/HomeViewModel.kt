@@ -31,6 +31,7 @@ class HomeViewModel : ViewModel(){
         var tempModel = UserModel();
         val user = mAuth.currentUser;
         response.value = DataState.Loading
+
         mDatabase.getReference("Users").child(user!!.uid).addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 tempModel.userName = snapshot.child("userName").getValue(String::class.java)
@@ -39,7 +40,7 @@ class HomeViewModel : ViewModel(){
                 tempModel.userId = snapshot.child("userName").getValue(String::class.java)
                 tempModel.userBalance = snapshot.child("userBalance").getValue(Double::class.java)
 
-                val list = mutableListOf<HashMap<String, TransactionModel>>()
+                val list = mutableListOf<LinkedHashMap<String, TransactionModel>>()
                 for (ds in snapshot.child("userTransactionHistory").children){
 
                     val snapshotKey = ds.key
@@ -50,7 +51,7 @@ class HomeViewModel : ViewModel(){
                     Log.d("DATABASE", transaction!!.transactionType!!)
                     Log.d("DATABASE", transaction!!.transactionValue!!.toString())
 
-                    val hash = hashMapOf(Pair(snapshotKey, transaction))
+                    val hash = linkedMapOf(Pair(snapshotKey, transaction))
 
                     list.add(hash)
                 }
