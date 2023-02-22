@@ -11,4 +11,5 @@
         Using the App may incur additional costs such as fees for the internet connection which shall be borne by Users."</string>
     <string name="title_activity_no_connection">NoConnection</string>
     <string name="title_activity_balance_change">BalanceChange</string>
+    <string name="title_activity_profile">ProfileActivity</string>
 </resources>

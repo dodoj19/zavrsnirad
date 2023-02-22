@@ -12,9 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +59,8 @@ class HomeScreen : ComponentActivity() {
             )
 
             Scaffold(
-                topBar = {},
+                topBar = {
+                },
                 bottomBar = {},
             ){paddingVal ->
                 Surface(
@@ -134,11 +133,14 @@ class HomeScreen : ComponentActivity() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeight(48.dp)
+                    .requiredHeight(60.dp)
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.End
             ){
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    startActivity(Intent(this@HomeScreen, ProfileActivity::class.java))
+                    overridePendingTransition(com.google.android.material.R.anim.abc_fade_in, com.google.android.material.R.anim.abc_fade_out)
+                }) {
                     Icon(
                         Icons.Filled.AccountCircle,
                         null,
@@ -178,7 +180,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(180.dp)
+                        .requiredHeight(220.dp)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -194,7 +196,7 @@ class HomeScreen : ComponentActivity() {
 
                         Text(
                             modifier = Modifier,
-                            text = "Your balance",
+                            text = "Your balance:",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
                             color = NormalText,
@@ -202,7 +204,8 @@ class HomeScreen : ComponentActivity() {
 
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .padding(5.dp),
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.Bottom
                         ){
@@ -219,33 +222,79 @@ class HomeScreen : ComponentActivity() {
                                 fontWeight = FontWeight.Medium,
                                 color = Color.Black,
                             )
-
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp),
+                            horizontalArrangement = Arrangement.End
+                        ){
                             OutlinedButton(
-                                modifier = Modifier.size(height= 40.dp, width = 100.dp),
-                                border = BorderStroke(2.dp, Color.DarkGray),
-                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.size(height= 40.dp, width = 90.dp),
+                                border = BorderStroke(2.dp, Color(0xFF388E3C)),
+                                shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
                                 onClick = {
-                                    startActivity(Intent(this@HomeScreen, BalanceChange::class.java))
+                                    val newIntent = Intent(this@HomeScreen, BalanceChange::class.java)
+                                    newIntent.putExtra("TransactionType", "Add")
+
+                                    startActivity(newIntent)
+
                                     overridePendingTransition(com.google.android.material.R.anim.abc_popup_enter, com.google.android.material.R.anim.abc_popup_exit)
                                     finishAfterTransition()
                                 }
                             ) {
+
                                 Text(
-                                    text = "NEW",
-                                    color = Color.DarkGray,
-                                    fontSize = 18.sp,
+                                    text = "ADD",
+                                    color = Color(0xFF388E3C),
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.W900
                                 )
+
+                                /*
                                 Icon(
                                     Icons.Filled.Add,
                                     null,
                                     Modifier,
                                     Color.DarkGray
+                                )*/
+                            }
+
+                            Spacer(Modifier.width(5.dp))
+
+                            OutlinedButton(
+                                modifier = Modifier.size(height= 40.dp, width = 90.dp),
+                                border = BorderStroke(2.dp, Color(0xFFB71C1C)),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
+                                onClick = {
+                                    val newIntent = Intent(this@HomeScreen, BalanceChange::class.java)
+                                    newIntent.putExtra("TransactionType", "Take")
+
+                                    startActivity(newIntent)
+
+                                    overridePendingTransition(com.google.android.material.R.anim.abc_popup_enter, com.google.android.material.R.anim.abc_popup_exit)
+                                    finishAfterTransition()
+                                }
+                            ) {
+
+                                Text(
+                                    text = "TAKE",
+                                    color = Color(0xFFB71C1C),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.W900
                                 )
+
+                                /*
+                                Icon(
+                                    Icons.Filled.Close,
+                                    null,
+                                    Modifier,
+                                    Color.DarkGray
+                                )*/
                             }
                         }
-
                     }
                 }
             }
@@ -427,7 +476,7 @@ class HomeScreen : ComponentActivity() {
 
                                         var currentTransactionType = TransactionType()
 
-                                        transactionCategories.forEach{type ->
+                                        transactionsIndex.forEach{type ->
                                             if(type.name == hashData.transactionType!!){
                                                 currentTransactionType = type
                                             }

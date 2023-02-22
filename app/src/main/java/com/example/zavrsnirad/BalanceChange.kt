@@ -3,24 +3,23 @@ package com.example.zavrsnirad
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,8 +27,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
@@ -50,6 +47,8 @@ class BalanceChange : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val transactionType = intent.extras!!.getString("TransactionType")!!
+
         onBackPressedDispatcher.addCallback(this ) {
             startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
             overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
@@ -61,7 +60,6 @@ class BalanceChange : ComponentActivity() {
             systemUiController.setStatusBarColor(
                 color = BGGray
             )
-            val navController = rememberNavController()
 
             Scaffold(
                 topBar = {},
@@ -255,7 +253,7 @@ class BalanceChange : ComponentActivity() {
                     LazyRow(
                         modifier = Modifier.padding(5.dp)
                     ){
-                        items(transactionCategories.size){ index ->
+                        items(transactionsIndex.size){ index ->
                                 Button(
                                     modifier = Modifier
                                         .fillMaxHeight()
@@ -268,10 +266,10 @@ class BalanceChange : ComponentActivity() {
                                         disabledElevation = 0.dp
                                     ),
                                     colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = transactionCategories[index].backgroundColor,
+                                        backgroundColor = transactionsIndex[index].backgroundColor,
                                     ),
                                     onClick = {
-                                        category = transactionCategories[index].name
+                                        category = transactionsIndex[index].name
                                         Log.d("TEXTST", category)
                                     }
                                 ){
@@ -285,17 +283,17 @@ class BalanceChange : ComponentActivity() {
                                             modifier = Modifier
                                                 .padding(0.dp)
                                                 .background(
-                                                    transactionCategories[index].textBackgroundColor,
+                                                    transactionsIndex[index].textBackgroundColor,
                                                     RoundedCornerShape(12.dp)
                                                 ),
-                                            text = transactionCategories[index].categoryIconString,
+                                            text = transactionsIndex[index].categoryIconString,
                                             fontSize = 50.sp,
                                             fontWeight = FontWeight.Light,
                                             color = Color.LightGray,
                                         )
                                         Text(
                                             modifier = Modifier,
-                                            text = transactionCategories[index].name,
+                                            text = transactionsIndex[index].name,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.W900,
                                             color = Color.White,
