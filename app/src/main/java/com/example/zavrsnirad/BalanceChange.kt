@@ -1,8 +1,11 @@
 package com.example.zavrsnirad
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.DatePicker
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -23,13 +26,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.example.zavrsnirad.sealed.DataState
 import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.ui.theme.NormalText
@@ -38,16 +41,21 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class BalanceChange : ComponentActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
+    private var transactionType: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val transactionType = intent.extras!!.getString("TransactionType")!!
+        transactionType = intent.extras!!.getString("TransactionType")!!
 
         onBackPressedDispatcher.addCallback(this ) {
             startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
@@ -150,7 +158,71 @@ class BalanceChange : ComponentActivity() {
 
         var newAmount by remember { mutableStateOf(TextFieldValue("")) }
         var transName by remember {mutableStateOf(TextFieldValue(""))}
-        var category by remember {mutableStateOf("")}
+        val category = remember {mutableStateOf("")}
+
+        var transactionList: List<TransactionType>
+
+        if (transactionType == "Add")
+            transactionList = depositTransactionCategories
+        else
+            transactionList = withdrawTransactionCategories
+
+        // Fetching the Local Context
+        val mContext = LocalContext.current
+
+        // Declaring integer values
+        // for year, month and day
+        val mYear: Int
+        val mMonth: Int
+        val mDay: Int
+
+        // Initializing a Calendar
+        val mCalendar = Calendar.getInstance()
+
+        // Fetching current year, month and day
+        mYear = mCalendar.get(Calendar.YEAR)
+        mMonth = mCalendar.get(Calendar.MONTH)
+        mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
+
+        mCalendar.time = Date()
+
+        // Declaring a string value to
+        // store date in string format
+        val mDate = remember { mutableStateOf("") }
+        mDate.value = SimpleDateFormat("dd/MM/yyyy").format(Date())
+
+        // Declaring DatePickerDialog and setting
+        // initial values as current values (present year, month and day)
+        val mDatePickerDialog = DatePickerDialog(
+            mContext,
+            { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+
+                var result: String = ""
+
+                if (mDayOfMonth < 10){
+                    result = result + "0" + mDayOfMonth.toString()
+                }
+                else{
+                    result += mDayOfMonth.toString()
+                }
+
+                result += "/"
+
+                if (mMonth+1 < 10){
+                    result = result + "0" + (mMonth+1).toString()
+                }
+                else{
+                    result += (mMonth+1).toString()
+                }
+
+                result += "/"
+                result += mYear.toString()
+
+                mDate.value = result
+
+                //mDate.value = "$mDayOfMonth/${mMonth+1}/$mYear"
+            }, mYear, mMonth, mDay
+        )
 
         Column(
             modifier = Modifier
@@ -223,7 +295,74 @@ class BalanceChange : ComponentActivity() {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeight(240.dp)
+                    .requiredHeight(160.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                shape = RoundedCornerShape(12.dp),
+                elevation = 2.dp,
+                backgroundColor = Color.White
+            ){
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(15.dp),
+                    verticalArrangement = Arrangement.SpaceAround
+                ){
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        Text(
+                            modifier = Modifier,
+                            text = "Date (${mDate.value})",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = NormalText,
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ){
+                        Spacer(Modifier.width(20.dp))
+                        OutlinedButton(
+                            border = BorderStroke(1.dp, Color.Blue),
+                            onClick = {
+                                mDate.value = SimpleDateFormat("dd/MM/yyyy").format(Date())
+                                Toast.makeText(this@BalanceChange, Date().toString(), Toast.LENGTH_SHORT).show()
+                            }
+                        ) {
+                            Text(
+                                modifier = Modifier,
+                                text = "TODAY",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Blue,
+                            )
+                        }
+
+                        OutlinedButton(
+                            border = BorderStroke(1.dp, Color.Red),
+                            onClick = {
+                                mDatePickerDialog.show()
+                            }
+                        ) {
+                            Text(
+                                modifier = Modifier,
+                                text = "PICK A DATE",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Red,
+                            )
+                        }
+                        Spacer(Modifier.width(20.dp))
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(260.dp)
                     .padding(10.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = 2.dp,
@@ -244,7 +383,7 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Text(
                             modifier = Modifier,
-                            text = "Category",
+                            text = "Category (${category.value})",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
                             color = NormalText,
@@ -253,7 +392,7 @@ class BalanceChange : ComponentActivity() {
                     LazyRow(
                         modifier = Modifier.padding(5.dp)
                     ){
-                        items(transactionsIndex.size){ index ->
+                        items(transactionList.size){ index ->
                                 Button(
                                     modifier = Modifier
                                         .fillMaxHeight()
@@ -266,11 +405,11 @@ class BalanceChange : ComponentActivity() {
                                         disabledElevation = 0.dp
                                     ),
                                     colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = transactionsIndex[index].backgroundColor,
+                                        backgroundColor = transactionList[index].backgroundColor,
                                     ),
                                     onClick = {
-                                        category = transactionsIndex[index].name
-                                        Log.d("TEXTST", category)
+                                        category.value = transactionList[index].name
+                                        Log.d("TEXTST", category.value)
                                     }
                                 ){
 
@@ -283,17 +422,17 @@ class BalanceChange : ComponentActivity() {
                                             modifier = Modifier
                                                 .padding(0.dp)
                                                 .background(
-                                                    transactionsIndex[index].textBackgroundColor,
+                                                    transactionList[index].textBackgroundColor,
                                                     RoundedCornerShape(12.dp)
                                                 ),
-                                            text = transactionsIndex[index].categoryIconString,
+                                            text = transactionList[index].categoryIconString,
                                             fontSize = 50.sp,
                                             fontWeight = FontWeight.Light,
                                             color = Color.LightGray,
                                         )
                                         Text(
                                             modifier = Modifier,
-                                            text = transactionsIndex[index].name,
+                                            text = transactionList[index].name,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.W900,
                                             color = Color.White,
@@ -394,14 +533,26 @@ class BalanceChange : ComponentActivity() {
                         ),
                         onClick = {
 
-                            val checkAmount = newAmount.text.toDoubleOrNull()
+                            var checkAmount = newAmount.text.toDoubleOrNull()
 
-                            if (checkAmount != null && category != "" && transName.text != null){
+                            if (checkAmount != null && category.value != "" && transName.text != null){
+
+                                if (transactionType == "Add")
+                                    checkAmount = Math.abs(checkAmount)
+                                else
+                                    checkAmount = -Math.abs(checkAmount)
+
+                                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                val date = LocalDate.parse(mDate.value, formatter)
+
+                                Log.d("****DEBUG****", date.toString())
+                                Log.d("****DEBUG****", date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString())
+
                                 val transaction = TransactionModel(
                                     transactionName = transName.text,
-                                    transactionType = category,
+                                    transactionType = category.value,
                                     transactionValue = checkAmount,
-                                    transactionDate = Date().time.toString()
+                                    transactionDate = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString()
                                 )
 
                                 val auth = Firebase.auth
@@ -472,8 +623,6 @@ class BalanceChange : ComponentActivity() {
                     }
                 }
             }
-
-
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.zavrsnirad
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -14,10 +15,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import android.graphics.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,10 +34,26 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.himanshoe.charty.line.LineChart
+import com.patrykandpatrick.vico.compose.axis.horizontal.bottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.startAxis
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.compose.component.shapeComponent
+import com.patrykandpatrick.vico.compose.component.textComponent
+import com.patrykandpatrick.vico.compose.dimensions.dimensionsOf
+import com.patrykandpatrick.vico.core.axis.AxisPosition
+import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
+import com.patrykandpatrick.vico.core.chart.decoration.Decoration
+import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.entryModelOf
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import com.patrykandpatrick.vico.core.chart.decoration.ThresholdLine
 import java.util.*
+
 
 @Suppress("OverrideDeprecatedMigration")
 class HomeScreen : ComponentActivity() {
@@ -42,6 +61,32 @@ class HomeScreen : ComponentActivity() {
     private lateinit var mAuth: FirebaseAuth
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private val COLOR_1_CODE = 0xff3e6558
+    private val COLOR_2_CODE = 0xff5e836a
+    private val COLOR_3_CODE = 0xffa5ba8e
+    private val COLOR_4_CODE = 0xffe9e5af
+    private val THRESHOLD_LINE_VALUE_RANGE_START = 7f
+    private val THRESHOLD_LINE_VALUE_RANGE_END = 14f
+    private val THRESHOLD_LINE_ALPHA = .36f
+    private val COLUMN_CORNER_CUT_SIZE_PERCENT = 50
+
+    private val color1 = Color(COLOR_1_CODE)
+    private val color2 = Color(COLOR_2_CODE)
+    private val color3 = Color(COLOR_3_CODE)
+    private val color4 = Color(COLOR_4_CODE)
+    private val chartColors = listOf(color1, color2, color3)
+    private val thresholdLineValueRange = THRESHOLD_LINE_VALUE_RANGE_START..THRESHOLD_LINE_VALUE_RANGE_END
+    private val thresholdLineLabelHorizontalPaddingValue = 8.dp
+    private val thresholdLineLabelVerticalPaddingValue = 2.dp
+    private val thresholdLineLabelMarginValue = 4.dp
+    private val thresholdLineLabelPadding =
+        dimensionsOf(thresholdLineLabelHorizontalPaddingValue, thresholdLineLabelVerticalPaddingValue)
+    private val thresholdLineLabelMargins = dimensionsOf(thresholdLineLabelMarginValue)
+    private val thresholdLineColor = color4.copy(THRESHOLD_LINE_ALPHA)
+    private val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    private val bottomAxisValueFormatter =
+        AxisValueFormatter<AxisPosition.Horizontal.Bottom> { x, _ -> daysOfWeek[x.toInt() % daysOfWeek.size] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -343,18 +388,71 @@ class HomeScreen : ComponentActivity() {
                                 .padding(15.dp),
                             contentAlignment = Alignment.Center,
 
-                        ){
-                            val dataList = mutableListOf(450, 230, 549, 204, 659, 1023, 543, 154, 92, 543, 354)
-                            val floatValue = mutableListOf<Float>()
-                            val datesList = mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+                        ) {
 
-                            dataList.forEachIndexed { index, value ->
+                            val transactions = data.userTransactionHistory!!
 
-                                floatValue.add(index = index, element = value.toFloat()/dataList.max().toFloat())
+                            val sumsPerDay = mutableMapOf<Int, Double>()
+
+                            for (transaction in transactions) {
+                                val transactionHash = transaction.values.elementAt(0)
+                                val transactionDate = transactionHash.transactionDate!!.toLong()
+                                val dateFormat = Date(transactionDate)
+
+                                val transactionValue = transactionHash.transactionValue!!
+
+                                val today = Date().time.toLong()
+
+                                val todayYear = SimpleDateFormat("yyyy").format(today).toInt()
+                                val todayMonth = SimpleDateFormat("MM").format(today).toInt()
+                                val todayDay = SimpleDateFormat("dd").format(today).toInt()
+                                val todayDayInYear = SimpleDateFormat("DDD").format(today).toInt()
+
+                                val transactionYear =
+                                    SimpleDateFormat("yyyy").format(dateFormat).toInt()
+                                val transactionMonth =
+                                    SimpleDateFormat("MM").format(dateFormat).toInt()
+                                val transactionDay =
+                                    SimpleDateFormat("dd").format(dateFormat).toInt()
+                                val transactionDayInYear =
+                                    SimpleDateFormat("DDD").format(dateFormat).toInt()
+
+                                if (transactionYear == todayYear && transactionMonth == todayMonth) {
+                                    if (sumsPerDay.keys.contains(transactionDay)) {
+                                        Log.d("****DEBUG****", "Contains")
+                                        sumsPerDay[transactionDay] =
+                                            sumsPerDay[transactionDay]!! + transactionValue
+                                    } else {
+                                        Log.d("****DEBUG****", "Does not contain")
+                                        sumsPerDay[transactionDay] = 0.00 + (transactionValue)
+                                    }
+                                }
 
                             }
 
-                            BarGraph(
+                            val dataList = mutableListOf<Int>()
+                            val floatValue = mutableListOf<Float>()
+                            val datesList = mutableListOf<Int>()
+
+                            sumsPerDay.toSortedMap().forEach { map ->
+                                val day = map.key
+                                val amount = map.value
+
+                                dataList.add(amount.toInt())
+                                datesList.add(day)
+                            }
+
+                            dataList.forEachIndexed { index, value ->
+
+                                floatValue.add(
+                                    index = index,
+                                    element = value.toFloat() / dataList.max().toFloat()
+                                )
+
+                            }
+
+                            /*
+                            BarChart(
                                 graphBarData = floatValue,
                                 xAxisScaleData = datesList,
                                 barData_ = dataList,
@@ -363,7 +461,38 @@ class HomeScreen : ComponentActivity() {
                                 barWidth = 15.dp,
                                 barColor = Purple500,
                                 barArrangement = Arrangement.SpaceEvenly
+                            )*/
+
+                            val chartEntryModel = entryModelOf(Pair(21, 680), Pair(24, -300), Pair(26, 400))
+
+                            val thresholdLine = rememberThresholdLine()
+
+                            Chart(
+                                chart = lineChart(
+                                    decorations = remember(thresholdLine) { listOf(thresholdLine) }
+                                ),
+                                model = chartEntryModel,
+                                startAxis = startAxis(
+                                    label = textComponent(
+                                        color = Color.Black,
+                                        background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, Color.Transparent),
+                                        padding = thresholdLineLabelPadding,
+                                        margins = thresholdLineLabelMargins,
+                                        typeface = Typeface.DEFAULT,
+                                    ),
+
+                                ),
+                                bottomAxis = bottomAxis(
+                                    label = textComponent(
+                                        color = Color.Black,
+                                        background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, Color.Transparent),
+                                        padding = thresholdLineLabelPadding,
+                                        margins = thresholdLineLabelMargins,
+                                        typeface = Typeface.DEFAULT,
+                                    )
+                                ),
                             )
+
                         }
                     }
                 }
@@ -488,7 +617,6 @@ class HomeScreen : ComponentActivity() {
                                                 .wrapContentHeight()
                                                 .padding(5.dp)
                                                 .background(Color.White, RoundedCornerShape(12.dp)),
-                                            horizontalArrangement = Arrangement.SpaceEvenly,
                                             verticalAlignment = Alignment.CenterVertically
                                         ){
                                             Column(
@@ -547,15 +675,20 @@ class HomeScreen : ComponentActivity() {
                                                 )
 
 
-                                                val formatter = SimpleDateFormat("dd.MM.yyyy hh:mm")
-                                                val dateString = formatter.format(Date(hashData.transactionDate!!.toLong()))
+                                                val formatter = SimpleDateFormat("dd.MM.yyyy")
+                                                val date = Date(hashData.transactionDate!!.toLong())
+                                                val dateString = formatter.format(date)
+
+                                                val year = SimpleDateFormat("yyyy").format(date)
+                                                val month = SimpleDateFormat("MM").format(date)
+                                                val day = SimpleDateFormat("dd").format(date)
 
                                                 Text(
                                                     text = dateString.toString(),
                                                     modifier = Modifier,
-                                                    color = Color.LightGray,
-                                                    fontSize = 20.sp,
-                                                    fontWeight = FontWeight.W300
+                                                    color = Color.DarkGray,
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.W600
                                                 )
                                             }
                                         }
@@ -569,103 +702,20 @@ class HomeScreen : ComponentActivity() {
         }
     }
 
-
-
-    /*
-
-
-
-Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeight(850.dp)
-                        .padding(10.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    elevation = 2.dp,
-                    backgroundColor = Color.White
-                ){
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ){
-                        Text(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            text = "Spending analytics",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = NormalText,
-                        )
-
-                        Spacer(Modifier.height(30.dp))
-
-                        PieChart(
-                            data = mapOf(
-                                Pair("Food", 12),
-                                Pair("Shopping", 25),
-                                Pair("Taxi", 8),
-                                Pair("Subscriptions", 20),
-                                Pair("Dept", 30),
-                            )
-                        )
-                    }
-                }
-            }
-     */
-
-    /*
     @Composable
-    fun Navigation(navController: NavHostController) {
-        NavHost(navController, startDestination = NavigationItem.Balance.route) {
-            composable(NavigationItem.Balance.route) {
-                BalanceScreen()
-            }
-            composable(NavigationItem.Depts.route) {
-                DeptsScreen()
-            }
-            composable(NavigationItem.Profile.route) {
-                ProfileScreen()
-            }
+    private fun rememberThresholdLine(): ThresholdLine {
+        val label = textComponent(
+            color = Color.Black,
+            background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, color2),
+            padding = thresholdLineLabelPadding,
+            margins = thresholdLineLabelMargins,
+            typeface = Typeface.DEFAULT,
+        )
+        val line = shapeComponent(color = thresholdLineColor)
+        return remember(label, line) {
+            ThresholdLine(
+                0f
+            )
         }
     }
-
-    @Composable
-    fun BottomNavigationBar(navController: NavController){
-        val items = listOf(
-            NavigationItem.Balance,
-            NavigationItem.Depts,
-            NavigationItem.Profile
-        )
-        BottomNavigation(
-            backgroundColor = Color.LightGray,
-            elevation = 5.dp,
-        ){
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-            items.forEach { item ->
-                BottomNavigationItem(
-                    icon = { Icon(item.icon, contentDescription = item.title) },
-                    label = { Text(text = item.title) },
-                    selectedContentColor = Color.DarkGray,
-                    unselectedContentColor = Color.White,
-                    alwaysShowLabel = true,
-                    selected = currentRoute == item.route,
-                    onClick = {
-                        navController.navigate(item.route) {
-                            navController.graph.startDestinationRoute?.let { route ->
-                                popUpTo(route) {
-                                    saveState = true
-                                }
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-        }*/
 }

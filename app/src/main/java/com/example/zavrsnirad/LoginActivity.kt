@@ -39,8 +39,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.delay
-import java.lang.Thread.sleep
 
 
 class LoginActivity : ComponentActivity() {
