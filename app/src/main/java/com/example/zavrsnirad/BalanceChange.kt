@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
@@ -66,11 +67,44 @@ class BalanceChange : ComponentActivity() {
         setContent{
             val systemUiController = rememberSystemUiController()
             systemUiController.setStatusBarColor(
-                color = BGGray
+                color = Color.White
             )
 
             Scaffold(
-                topBar = {},
+                topBar = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(.9f)
+                            .requiredHeight(160.dp)
+                            .background(Color.Transparent),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        IconButton(
+                            onClick = {
+                                startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
+                                finishAfterTransition()
+                            }
+                        ){
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = null,
+                                tint = Color.DarkGray,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp),
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = latoFontFamily,
+                            color = NormalText,
+                            text = "NEW TRANSACTION"
+                        )
+                    }
+                },
                 bottomBar = {},
             ){paddingVal ->
                 Surface(
@@ -85,30 +119,8 @@ class BalanceChange : ComponentActivity() {
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.Top
                     ){
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .size(120.dp)
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(horizontal = 20.dp),
-                                    fontSize = 38.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = NormalText,
-                                    text = "New transaction"
-                                )
-                            }
-                        }
-
                         SetData(viewModel)
-
-                        }
+                    }
                     }
                 }
             }
@@ -226,7 +238,8 @@ class BalanceChange : ComponentActivity() {
 
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(5.dp),
         ){
             Card(
                 modifier = Modifier
@@ -250,9 +263,10 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Text(
                             modifier = Modifier,
-                            text = "Description",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
+                            text = "DESCRIPTION",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = latoFontFamily,
                             color = NormalText,
                         )
                     }
@@ -312,9 +326,10 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Text(
                             modifier = Modifier,
-                            text = "Date (${mDate.value})",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
+                            text = "DATE (${mDate.value})",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = latoFontFamily,
                             color = NormalText,
                         )
                     }
@@ -325,26 +340,28 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Spacer(Modifier.width(20.dp))
                         OutlinedButton(
-                            border = BorderStroke(1.dp, Color.Blue),
+                            border = BorderStroke(2.dp, Color.Magenta),
                             onClick = {
                                 mDate.value = SimpleDateFormat("dd/MM/yyyy").format(Date())
                                 Toast.makeText(this@BalanceChange, Date().toString(), Toast.LENGTH_SHORT).show()
-                            }
+                            },
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Text(
                                 modifier = Modifier,
                                 text = "TODAY",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Blue,
+                                color = Color.Magenta,
                             )
                         }
 
                         OutlinedButton(
-                            border = BorderStroke(1.dp, Color.Red),
+                            border = BorderStroke(2.dp, Color.Red),
                             onClick = {
                                 mDatePickerDialog.show()
-                            }
+                            },
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Text(
                                 modifier = Modifier,
@@ -383,9 +400,10 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Text(
                             modifier = Modifier,
-                            text = "Category (${category.value})",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
+                            text = "CATEGORY (${category.value})",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = latoFontFamily,
                             color = NormalText,
                         )
                     }
@@ -409,7 +427,6 @@ class BalanceChange : ComponentActivity() {
                                     ),
                                     onClick = {
                                         category.value = transactionList[index].name
-                                        Log.d("TEXTST", category.value)
                                     }
                                 ){
 
@@ -466,9 +483,10 @@ class BalanceChange : ComponentActivity() {
                     ){
                         Text(
                             modifier = Modifier,
-                            text = "Amount",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
+                            text = "AMOUNT",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = latoFontFamily,
                             color = NormalText,
                         )
                     }
@@ -552,26 +570,89 @@ class BalanceChange : ComponentActivity() {
                                     transactionName = transName.text,
                                     transactionType = category.value,
                                     transactionValue = checkAmount,
-                                    transactionDate = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString()
+                                    transactionDate = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString(),
+                                    balanceAfterTransaction = data.userBalance!! + checkAmount
                                 )
+
+                                fun updateBalanceAfterTransaction(user: UserModel, newTransaction: TransactionModel) {
+                                    // Add the new transaction to the user's transaction history
+                                    val transactionMap = LinkedHashMap<String, TransactionModel>()
+                                    transactionMap["${user.userTransactionHistory?.size?.plus(1)}"] = newTransaction
+                                    user.userTransactionHistory?.add(transactionMap)
+
+                                    // Sort the transaction history by date
+                                    user.userTransactionHistory?.sortWith(compareBy { it.values.first().transactionDate })
+
+                                    // Update the balance after the transaction for affected transactions
+                                    var currentBalance = user.userBalance
+                                    for (transactionMap in user.userTransactionHistory!!) {
+                                        val transaction = transactionMap.values.first()
+
+                                        if (transaction.transactionDate!! >= newTransaction.transactionDate!!) {
+                                            currentBalance = if (transaction.transactionType == "income") {
+                                                currentBalance?.plus(transaction.transactionValue!!)
+                                            } else {
+                                                currentBalance?.minus(transaction.transactionValue!!)
+                                            }
+                                            transaction.balanceAfterTransaction = currentBalance
+                                        } else {
+                                            currentBalance = transaction.balanceAfterTransaction
+                                        }
+                                    }
+                                }
 
                                 val auth = Firebase.auth
                                 val user = auth.currentUser
                                 val database = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
                                 val dbRef = database.getReference("Users")
+                                val tempData = dbRef.get().addOnSuccessListener {temp ->
+                                    val key = (temp.child(user!!.uid).child("userTransactionHistory").childrenCount+1)
 
-                                dbRef.child(user!!.uid).child("userTransactionHistory").child(Date().time.toString()).setValue(transaction)
-                                    .addOnCompleteListener {
-                                        val balReference = dbRef.child(user.uid).child("userBalance")
-                                        balReference.setValue(data.userBalance!! + checkAmount).addOnCompleteListener {
-                                            startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
-                                            overridePendingTransition(
-                                                com.google.android.material.R.anim.abc_popup_enter,
-                                                com.google.android.material.R.anim.abc_popup_exit
-                                            )
-                                            finishAfterTransition()
+                                    val currentUserModel = UserModel()
+                                    currentUserModel.userName = temp.child("userName").getValue(String::class.java)
+                                    currentUserModel.userGender = temp.child("userGender").getValue(String::class.java)
+                                    currentUserModel.userJoin = temp.child("userName").getValue(String::class.java)
+                                    currentUserModel.userId = temp.child("userName").getValue(String::class.java)
+                                    currentUserModel.userBalance = temp.child("userBalance").getValue(Double::class.java)
+
+                                    val listA = mutableListOf<LinkedHashMap<String, TransactionModel>>()
+                                    for (ds in temp.child("userTransactionHistory").children) {
+                                        val snapshotKey = ds.key!!
+                                        val transaction: TransactionModel? = ds.getValue(TransactionModel::class.java)
+                                        if (transaction != null) {
+                                            val hashA = linkedMapOf(Pair(snapshotKey, transaction))
+                                            listA.add(hashA)
                                         }
                                     }
+                                    currentUserModel.userTransactionHistory = listA
+
+
+
+                                    dbRef.child(user.uid).child("userTransactionHistory").child(key.toString()).setValue(transaction)
+                                        .addOnCompleteListener {
+
+                                            updateBalanceAfterTransaction(
+                                                user = currentUserModel,
+                                                newTransaction = transaction
+                                            )
+
+                                            val balReference = dbRef.child(user.uid).child("userBalance")
+                                            balReference.setValue(data.userBalance!! + checkAmount).addOnCompleteListener {
+                                                startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
+                                                overridePendingTransition(
+                                                    com.google.android.material.R.anim.abc_popup_enter,
+                                                    com.google.android.material.R.anim.abc_popup_exit
+                                                )
+                                                finishAfterTransition()
+                                            }
+                                        }
+                                }
+
+                                //Date().time.toString()
+
+
+
+
                             }
                         }
                     ) {

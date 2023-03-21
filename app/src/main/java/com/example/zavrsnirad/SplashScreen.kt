@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.zavrsnirad.ui.theme.BGGray
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -42,6 +43,12 @@ class SplashScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
+        setContent{
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(
+                color = BGGray
+            )
+        }
     }
 
     fun moveToSignup(){
@@ -107,6 +114,12 @@ class SplashScreen : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        setContent{
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(
+                color = BGGray
+            )
+        }
         runActivityDetermineCheck()
     }
 

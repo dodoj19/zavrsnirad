@@ -13,4 +13,6 @@
     <string name="title_activity_balance_change">BalanceChange</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_test_chart">TestChart</string>
+    <string name="title_activity_all_transactions">AllTransactions</string>
+    <string name="title_activity_alter_profile">AlterProfileActivity</string>
 </resources>

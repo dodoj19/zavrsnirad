@@ -1,5 +1,6 @@
-package com.example.zavrsnirad
+package com.example.zavrsnirad.composables
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -14,21 +15,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.zavrsnirad.transactionsIndex
 import com.example.zavrsnirad.ui.theme.*
 
 @Composable
 fun PieChart(
     data: Map<String, Int>,
     radiusOuter: Dp = 90.dp,
-    chartBarWidth: Dp = 20.dp,
-    animDuration: Int = 1000,
+    chartBarWidth: Dp = 25.dp,
+    animDuration: Int = 500,
     ) {
 
     val totalSum = data.values.sum()
@@ -37,15 +38,6 @@ fun PieChart(
     data.values.forEachIndexed { index, values ->
         floatValue.add(index, 360 * values.toFloat() / totalSum.toFloat())
     }
-
-    val colors = listOf(
-        Purple200,
-        Purple500,
-        Teal200,
-        Purple700,
-        Blue,
-        Red200
-    )
 
     var animationPlayed by remember { mutableStateOf(false)}
 
@@ -78,6 +70,8 @@ fun PieChart(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        val colorsForText = mutableListOf<Color>()
+
         Box(
             modifier = Modifier.size(animateSize.dp),
             contentAlignment = Alignment.Center
@@ -88,8 +82,21 @@ fun PieChart(
                     .rotate(animateRotation)
             ) {
                 floatValue.forEachIndexed { index, value ->
+
+                    var categoryColor: Color = Color.Blue;
+
+                    val targetCategory = data.keys.elementAt(index)
+
+                    transactionsIndex.forEach{ type ->
+                        if(type.name == targetCategory){
+                            categoryColor = type.textBackgroundColor
+                        }
+                    }
+
+                    colorsForText.add(categoryColor)
+
                     drawArc(
-                        color = colors[index],
+                        color = categoryColor,
                         lastValue,
                         value,
                         useCenter = false,
@@ -98,11 +105,10 @@ fun PieChart(
                     lastValue += value
                 }
             }
-            }
+        }
 
         DetailsPieChart(
-            data = data,
-            colors = colors
+            data = data
         )
     }
 }
@@ -110,18 +116,37 @@ fun PieChart(
 @Composable
 fun DetailsPieChart(
     data: Map<String, Int>,
-    colors: List<Color>
 ) {
+    val providedColors = mutableListOf<Color>()
+
+    data.forEach { s, i ->
+        var categoryColor: Color = Color.Blue;
+        val targetCategory = s
+
+        transactionsIndex.forEach{ type ->
+            if(type.name == targetCategory){
+                categoryColor = type.textBackgroundColor
+            }
+        }
+
+        providedColors.add(categoryColor)
+    }
+
     Column(
         modifier = Modifier
             .padding(top = 80.dp)
             .fillMaxWidth()
     ) {
         data.values.forEachIndexed { index, value ->
+
+            Log.d("****DEBUG****", index.toString())
+            Log.d("****DEBUG****", providedColors.toString())
+
             DetailsPieChartItem(
                 data = Pair(data.keys.elementAt(index), value),
-                color = colors[index]
+                color = providedColors[index],
             )
+
         }
 
     }
@@ -158,13 +183,13 @@ fun DetailsPieChartItem(
                 Text(
                     modifier = Modifier.padding(start = 15.dp),
                     text = data.first,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
                     color = Color.Black
                 )
                 Text(
                     modifier = Modifier.padding(start = 15.dp),
-                    text = (data.second.toFloat()).toString() + "€",
+                    text = (data.second.toInt()).toString() + "€",
                     fontWeight = FontWeight.Medium,
                     fontSize = 22.sp,
                     color = Color.Gray

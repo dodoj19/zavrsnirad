@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,86 +15,40 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import android.graphics.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.zavrsnirad.composables.PieChart
 import com.example.zavrsnirad.sealed.DataState
 import com.example.zavrsnirad.ui.theme.AcceptButtonBG
 import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.ui.theme.NormalText
-import com.example.zavrsnirad.ui.theme.Purple500
 import com.example.zavrsnirad.viewmodels.HomeViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.himanshoe.charty.line.LineChart
-import com.patrykandpatrick.vico.compose.axis.horizontal.bottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.startAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.compose.component.shapeComponent
-import com.patrykandpatrick.vico.compose.component.textComponent
-import com.patrykandpatrick.vico.compose.dimensions.dimensionsOf
-import com.patrykandpatrick.vico.core.axis.AxisPosition
-import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatrick.vico.core.chart.decoration.Decoration
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.entryModelOf
+import com.patrykandpatrick.vico.core.entry.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import com.patrykandpatrick.vico.core.chart.decoration.ThresholdLine
 import java.util.*
+import kotlin.math.abs
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Suppress("OverrideDeprecatedMigration")
 class HomeScreen : ComponentActivity() {
-
     private lateinit var mAuth: FirebaseAuth
-
     private val viewModel: HomeViewModel by viewModels()
-
-    private val COLOR_1_CODE = 0xff3e6558
-    private val COLOR_2_CODE = 0xff5e836a
-    private val COLOR_3_CODE = 0xffa5ba8e
-    private val COLOR_4_CODE = 0xffe9e5af
-    private val THRESHOLD_LINE_VALUE_RANGE_START = 7f
-    private val THRESHOLD_LINE_VALUE_RANGE_END = 14f
-    private val THRESHOLD_LINE_ALPHA = .36f
-    private val COLUMN_CORNER_CUT_SIZE_PERCENT = 50
-
-    private val color1 = Color(COLOR_1_CODE)
-    private val color2 = Color(COLOR_2_CODE)
-    private val color3 = Color(COLOR_3_CODE)
-    private val color4 = Color(COLOR_4_CODE)
-    private val chartColors = listOf(color1, color2, color3)
-    private val thresholdLineValueRange = THRESHOLD_LINE_VALUE_RANGE_START..THRESHOLD_LINE_VALUE_RANGE_END
-    private val thresholdLineLabelHorizontalPaddingValue = 8.dp
-    private val thresholdLineLabelVerticalPaddingValue = 2.dp
-    private val thresholdLineLabelMarginValue = 4.dp
-    private val thresholdLineLabelPadding =
-        dimensionsOf(thresholdLineLabelHorizontalPaddingValue, thresholdLineLabelVerticalPaddingValue)
-    private val thresholdLineLabelMargins = dimensionsOf(thresholdLineLabelMarginValue)
-    private val thresholdLineColor = color4.copy(THRESHOLD_LINE_ALPHA)
-    private val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    private val bottomAxisValueFormatter =
-        AxisValueFormatter<AxisPosition.Horizontal.Bottom> { x, _ -> daysOfWeek[x.toInt() % daysOfWeek.size] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        onBackPressedDispatcher.addCallback(this ) {
-            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
-        }
-
         mAuth = Firebase.auth
 
         setContent{
@@ -102,10 +56,8 @@ class HomeScreen : ComponentActivity() {
             systemUiController.setStatusBarColor(
                 color = BGGray
             )
-
             Scaffold(
-                topBar = {
-                },
+                topBar = {},
                 bottomBar = {},
             ){paddingVal ->
                 Surface(
@@ -118,9 +70,8 @@ class HomeScreen : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.Top
+                        verticalArrangement = Arrangement.Center
                     ){
-
                         SetData(viewModel)
                     }
                 }
@@ -137,7 +88,7 @@ class HomeScreen : ComponentActivity() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Color.DarkGray)
                 }
             }
             is DataState.Success->{
@@ -168,13 +119,21 @@ class HomeScreen : ComponentActivity() {
         }
     }
 
+
+
+
+
+
+
+
+
+
     @Composable
     fun ShowColumn(data: UserModel) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceAround
         ){
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -182,14 +141,19 @@ class HomeScreen : ComponentActivity() {
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.End
             ){
-                IconButton(onClick = {
-                    startActivity(Intent(this@HomeScreen, ProfileActivity::class.java))
-                    overridePendingTransition(com.google.android.material.R.anim.abc_fade_in, com.google.android.material.R.anim.abc_fade_out)
-                }) {
+                IconButton(
+                    onClick = {
+                        val newIntent = Intent(this@HomeScreen, ProfileActivity::class.java)
+                        startActivity(newIntent)
+                        overridePendingTransition(
+                            com.google.android.material.R.anim.abc_popup_enter,
+                            com.google.android.material.R.anim.abc_popup_exit
+                        )
+                    }) {
                     Icon(
                         Icons.Filled.AccountCircle,
                         null,
-                        Modifier.size(48.dp),
+                        Modifier.size(36.dp),
                         Color.DarkGray
                     )
                 }
@@ -203,20 +167,37 @@ class HomeScreen : ComponentActivity() {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(140.dp)
+                        .wrapContentHeight()
                 ){
                     Text(
-                        modifier = Modifier
-                            .padding(horizontal = 15.dp, vertical = 10.dp),
-                        fontSize = 38.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = NormalText,
-                        text = "Welcome back! ${data.userName}",
-                        textAlign = TextAlign.Left
+                        text = buildAnnotatedString {
+                                 Text(
+                                     text="Welcome back!\n\n",
+                                     modifier = Modifier
+                                         .padding(horizontal = 15.dp, vertical = 5.dp),
+                                     fontWeight = FontWeight.Normal,
+                                     fontSize = 42.sp,
+                                     color = NormalText,
+                                     textAlign = TextAlign.Left,
+                                 );
+
+                            Text(
+                                text = "${data.userName}",
+                                modifier = Modifier
+                                    .padding(horizontal = 15.dp, vertical = 5.dp),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 46.sp,
+                                color = NormalText,
+                                textAlign = TextAlign.Left,
+                            )
+                        },
+
                     )
                 }
-
             }
+
+
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -225,7 +206,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(220.dp)
+                        .wrapContentHeight()
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -242,8 +223,8 @@ class HomeScreen : ComponentActivity() {
                         Text(
                             modifier = Modifier,
                             text = "Your balance:",
-                            fontSize = 32.sp,
                             fontWeight = FontWeight.Normal,
+                            fontSize = 32.sp,
                             color = NormalText,
                         )
 
@@ -263,8 +244,8 @@ class HomeScreen : ComponentActivity() {
                                 modifier = Modifier
                                     .weight(0.8f),
                                 text = roundoff.toString() + "€",
-                                fontSize = 52.sp,
-                                fontWeight = FontWeight.Medium,
+                                fontSize = 62.sp,
+                                fontWeight = FontWeight.Black,
                                 color = Color.Black,
                             )
                         }
@@ -276,41 +257,31 @@ class HomeScreen : ComponentActivity() {
                         ){
                             OutlinedButton(
                                 modifier = Modifier.size(height= 40.dp, width = 90.dp),
-                                border = BorderStroke(2.dp, Color(0xFF388E3C)),
+                                border = BorderStroke(2.dp, Color.Blue),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
                                 onClick = {
                                     val newIntent = Intent(this@HomeScreen, BalanceChange::class.java)
                                     newIntent.putExtra("TransactionType", "Add")
-
                                     startActivity(newIntent)
-
-                                    overridePendingTransition(com.google.android.material.R.anim.abc_popup_enter, com.google.android.material.R.anim.abc_popup_exit)
+                                    overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                                     finishAfterTransition()
                                 }
                             ) {
 
                                 Text(
                                     text = "ADD",
-                                    color = Color(0xFF388E3C),
+                                    color = Color.Blue,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.W900
                                 )
-
-                                /*
-                                Icon(
-                                    Icons.Filled.Add,
-                                    null,
-                                    Modifier,
-                                    Color.DarkGray
-                                )*/
                             }
 
                             Spacer(Modifier.width(5.dp))
 
                             OutlinedButton(
                                 modifier = Modifier.size(height= 40.dp, width = 90.dp),
-                                border = BorderStroke(2.dp, Color(0xFFB71C1C)),
+                                border = BorderStroke(2.dp, Color.DarkGray),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.DarkGray),
                                 onClick = {
@@ -323,26 +294,22 @@ class HomeScreen : ComponentActivity() {
                                     finishAfterTransition()
                                 }
                             ) {
-
                                 Text(
                                     text = "TAKE",
-                                    color = Color(0xFFB71C1C),
+                                    color = Color.DarkGray,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.W900
                                 )
-
-                                /*
-                                Icon(
-                                    Icons.Filled.Close,
-                                    null,
-                                    Modifier,
-                                    Color.DarkGray
-                                )*/
                             }
                         }
                     }
                 }
             }
+
+
+
+
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -351,7 +318,7 @@ class HomeScreen : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(330.dp)
+                        .wrapContentHeight()
                         .padding(horizontal = 10.dp, vertical = 5.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -387,112 +354,44 @@ class HomeScreen : ComponentActivity() {
                                 .fillMaxSize()
                                 .padding(15.dp),
                             contentAlignment = Alignment.Center,
-
                         ) {
+                            val transactionsData = data.userTransactionHistory!!
+                            val transactionsLastMonth = mutableListOf<TransactionModel>()
 
-                            val transactions = data.userTransactionHistory!!
-
-                            val sumsPerDay = mutableMapOf<Int, Double>()
-
-                            for (transaction in transactions) {
+                            for (transaction in transactionsData) {
                                 val transactionHash = transaction.values.elementAt(0)
                                 val transactionDate = transactionHash.transactionDate!!.toLong()
                                 val dateFormat = Date(transactionDate)
-
-                                val transactionValue = transactionHash.transactionValue!!
-
-                                val today = Date().time.toLong()
+                                val today = Date().time
 
                                 val todayYear = SimpleDateFormat("yyyy").format(today).toInt()
                                 val todayMonth = SimpleDateFormat("MM").format(today).toInt()
                                 val todayDay = SimpleDateFormat("dd").format(today).toInt()
                                 val todayDayInYear = SimpleDateFormat("DDD").format(today).toInt()
 
-                                val transactionYear =
-                                    SimpleDateFormat("yyyy").format(dateFormat).toInt()
-                                val transactionMonth =
-                                    SimpleDateFormat("MM").format(dateFormat).toInt()
-                                val transactionDay =
-                                    SimpleDateFormat("dd").format(dateFormat).toInt()
-                                val transactionDayInYear =
-                                    SimpleDateFormat("DDD").format(dateFormat).toInt()
+                                val transactionYear = SimpleDateFormat("yyyy").format(dateFormat).toInt()
+                                val transactionMonth = SimpleDateFormat("MM").format(dateFormat).toInt()
+                                val transactionDay = SimpleDateFormat("dd").format(dateFormat).toInt()
+                                val transactionDayInYear = SimpleDateFormat("DDD").format(dateFormat).toInt()
 
                                 if (transactionYear == todayYear && transactionMonth == todayMonth) {
-                                    if (sumsPerDay.keys.contains(transactionDay)) {
-                                        Log.d("****DEBUG****", "Contains")
-                                        sumsPerDay[transactionDay] =
-                                            sumsPerDay[transactionDay]!! + transactionValue
-                                    } else {
-                                        Log.d("****DEBUG****", "Does not contain")
-                                        sumsPerDay[transactionDay] = 0.00 + (transactionValue)
-                                    }
+                                    transactionsLastMonth.add(transaction.values.elementAt(0))
+                                    //Log.d("****DEBUG****", "Transaction -->" + transaction.values.elementAt(0).toString())
                                 }
-
                             }
 
-                            val dataList = mutableListOf<Int>()
-                            val floatValue = mutableListOf<Float>()
-                            val datesList = mutableListOf<Int>()
+                            val groupedTransactions = transactionsLastMonth
+                                .filter { it.transactionValue ?: 0.0 < 0 }
+                                .groupBy(TransactionModel::transactionType)
 
-                            sumsPerDay.toSortedMap().forEach { map ->
-                                val day = map.key
-                                val amount = map.value
+                            val data = groupedTransactions
+                                .mapKeys { it.key!! }
+                                .mapValues { entry -> abs(entry.value.sumOf { it.transactionValue ?: 0.0 }).toInt() }
 
-                                dataList.add(amount.toInt())
-                                datesList.add(day)
-                            }
-
-                            dataList.forEachIndexed { index, value ->
-
-                                floatValue.add(
-                                    index = index,
-                                    element = value.toFloat() / dataList.max().toFloat()
-                                )
-
-                            }
-
-                            /*
-                            BarChart(
-                                graphBarData = floatValue,
-                                xAxisScaleData = datesList,
-                                barData_ = dataList,
-                                height = 140.dp,
-                                roundType = BarType.TOP_CURVED,
-                                barWidth = 15.dp,
-                                barColor = Purple500,
-                                barArrangement = Arrangement.SpaceEvenly
-                            )*/
-
-                            val chartEntryModel = entryModelOf(Pair(21, 680), Pair(24, -300), Pair(26, 400))
-
-                            val thresholdLine = rememberThresholdLine()
-
-                            Chart(
-                                chart = lineChart(
-                                    decorations = remember(thresholdLine) { listOf(thresholdLine) }
-                                ),
-                                model = chartEntryModel,
-                                startAxis = startAxis(
-                                    label = textComponent(
-                                        color = Color.Black,
-                                        background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, Color.Transparent),
-                                        padding = thresholdLineLabelPadding,
-                                        margins = thresholdLineLabelMargins,
-                                        typeface = Typeface.DEFAULT,
-                                    ),
-
-                                ),
-                                bottomAxis = bottomAxis(
-                                    label = textComponent(
-                                        color = Color.Black,
-                                        background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, Color.Transparent),
-                                        padding = thresholdLineLabelPadding,
-                                        margins = thresholdLineLabelMargins,
-                                        typeface = Typeface.DEFAULT,
-                                    )
-                                ),
+                            Log.d("****DEBUG****", data.toString())
+                            PieChart(
+                                data = data
                             )
-
                         }
                     }
                 }
@@ -549,7 +448,9 @@ class HomeScreen : ComponentActivity() {
                                 border = BorderStroke(0.dp, Color.White),
                                 shape = RoundedCornerShape(10.dp),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = BGGray, contentColor = Color.LightGray),
-                                onClick = { /*TODO*/ }
+                                onClick = {
+                                    startActivity(Intent(this@HomeScreen, AllTransactions::class.java))
+                                }
                             ) {
                                 Text(
                                     text = "VIEW ALL",
@@ -569,14 +470,6 @@ class HomeScreen : ComponentActivity() {
                                 )
                             }
 
-                            /*
-                            ClickableText(
-                                modifier = Modifier
-                                    .padding(5.dp),
-                                text = AnnotatedString("VIEW ALL", paragraphStyle = ParagraphStyle(
-                                    TextAlign.Right, textDirection = TextDirection.Content)),
-                                onClick = {}
-                            )*/
                         }
 
                         Row(
@@ -589,7 +482,7 @@ class HomeScreen : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .fillMaxSize()
-                                    .background(color = BGGray, RoundedCornerShape(12.dp)),
+                                    .background(color = BGGray, RoundedCornerShape(20.dp)),
                             ){
 
                                 val transactions = data.userTransactionHistory!!.takeLast(5).reversed()
@@ -600,9 +493,8 @@ class HomeScreen : ComponentActivity() {
                                 ){
                                     items(transactions.size){index ->
 
-                                        val hash = transactions.get(index)
+                                        val hash = transactions[index]
                                         val hashData = hash.values.elementAt(0)
-
                                         var currentTransactionType = TransactionType()
 
                                         transactionsIndex.forEach{type ->
@@ -616,12 +508,13 @@ class HomeScreen : ComponentActivity() {
                                                 .fillMaxWidth()
                                                 .wrapContentHeight()
                                                 .padding(5.dp)
-                                                .background(Color.White, RoundedCornerShape(12.dp)),
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .background(Color.White, RoundedCornerShape(25.dp)),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceEvenly
                                         ){
                                             Column(
                                                 Modifier.padding(5.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                horizontalAlignment = Alignment.CenterHorizontally,
                                             ){
                                                 Text(
                                                     modifier = Modifier
@@ -640,7 +533,7 @@ class HomeScreen : ComponentActivity() {
                                                     modifier = Modifier,
                                                     color = currentTransactionType.backgroundColor,
                                                     fontSize = 20.sp,
-                                                    fontWeight = FontWeight.W900
+                                                    fontWeight = FontWeight.W900,
                                                 )
                                             }
 
@@ -674,7 +567,6 @@ class HomeScreen : ComponentActivity() {
                                                     fontWeight = FontWeight.W900
                                                 )
 
-
                                                 val formatter = SimpleDateFormat("dd.MM.yyyy")
                                                 val date = Date(hashData.transactionDate!!.toLong())
                                                 val dateString = formatter.format(date)
@@ -699,23 +591,6 @@ class HomeScreen : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun rememberThresholdLine(): ThresholdLine {
-        val label = textComponent(
-            color = Color.Black,
-            background = shapeComponent(com.patrykandpatrick.vico.core.component.shape.Shapes.pillShape, color2),
-            padding = thresholdLineLabelPadding,
-            margins = thresholdLineLabelMargins,
-            typeface = Typeface.DEFAULT,
-        )
-        val line = shapeComponent(color = thresholdLineColor)
-        return remember(label, line) {
-            ThresholdLine(
-                0f
-            )
         }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.zavrsnirad.composables.PieChart
 import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.ui.theme.NormalText
 import com.google.firebase.auth.ktx.auth
