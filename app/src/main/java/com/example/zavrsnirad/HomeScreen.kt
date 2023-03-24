@@ -1,5 +1,6 @@
 package com.example.zavrsnirad
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,9 +17,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +46,11 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.alpha
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -119,20 +131,38 @@ class HomeScreen : ComponentActivity() {
         }
     }
 
-
-
-
-
-
-
-
-
-
+    @SuppressLint("SimpleDateFormat")
     @Composable
     fun ShowColumn(data: UserModel) {
+        var hasSpendingRecordLastMonth: Boolean = false
+
+        val checkTransactions = data.userTransactionHistory!!.takeLast(10).reversed()
+        checkTransactions.forEach{ model ->
+            val checkHash = model.values.elementAt(0)
+            val checkFormatter = SimpleDateFormat("dd.MM.yyyy")
+
+            val transDate = Date(checkHash.transactionDate!!.toLong())
+            val transDateString = checkFormatter.format(transDate).toString()
+
+            //Log.d("****DEBUG****", transDateString)
+
+            val transDateParsed = checkFormatter.parse(transDateString)
+            val transYear = SimpleDateFormat("yyyy").format(transDateParsed!!).toInt()
+            val transMonth = SimpleDateFormat("MM").format(transDateParsed!!).toInt()
+
+            val todayYear = SimpleDateFormat("yyyy").format(Date().time).toInt()
+            val todayMonth = SimpleDateFormat("MM").format(Date().time).toInt()
+
+            if ((todayYear == transYear) && (todayMonth == transMonth) && (!IsAdd(checkHash.transactionType!!))){
+                hasSpendingRecordLastMonth = true;
+            }
+        }
+
+
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceAround
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally
         ){
             Row(
                 modifier = Modifier
@@ -153,56 +183,54 @@ class HomeScreen : ComponentActivity() {
                     Icon(
                         Icons.Filled.AccountCircle,
                         null,
-                        Modifier.size(36.dp),
+                        Modifier.size(42.dp),
                         Color.DarkGray
                     )
                 }
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(180.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ){
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                ){
-                    Text(
-                        text = buildAnnotatedString {
-                                 Text(
-                                     text="Welcome back!\n\n",
-                                     modifier = Modifier
-                                         .padding(horizontal = 15.dp, vertical = 5.dp),
-                                     fontWeight = FontWeight.Normal,
-                                     fontSize = 42.sp,
-                                     color = NormalText,
-                                     textAlign = TextAlign.Left,
-                                 );
-
+                Text(
+                    text = buildAnnotatedString {
+                        Column(
+                            modifier = Modifier,
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ){
                             Text(
-                                text = "${data.userName}",
+                                text="Welcome back!",
                                 modifier = Modifier
-                                    .padding(horizontal = 15.dp, vertical = 5.dp),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 46.sp,
+                                    .padding(horizontal = 15.dp, vertical = 0.dp),
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 42.sp,
                                 color = NormalText,
                                 textAlign = TextAlign.Left,
                             )
-                        },
-
-                    )
-                }
+                            Text(
+                                text = "${data.userName}",
+                                modifier = Modifier
+                                    .padding(horizontal = 15.dp, vertical = 0.dp),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 38.sp,
+                                color = NormalText,
+                                textAlign = TextAlign.Left,
+                            )
+                        }
+                    },
+                )
             }
-
-
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -306,92 +334,90 @@ class HomeScreen : ComponentActivity() {
                 }
             }
 
-
-
-
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = 2.dp,
-                    backgroundColor = Color.White
+            // Spending card and row
+            if (hasSpendingRecordLastMonth){
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ){
-
-                    Column(
+                    Card(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
-                        verticalArrangement = Arrangement.Center
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = 2.dp,
+                        backgroundColor = Color.White
                     ){
 
-                        Text(
-                            modifier = Modifier
-                                .padding(0.dp),
-                            text = "Spending",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = NormalText,
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(5.dp),
-                            text = "This month",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W600,
-                            color = NormalText,
-                        )
-
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(15.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            val transactionsData = data.userTransactionHistory!!
-                            val transactionsLastMonth = mutableListOf<TransactionModel>()
+                                .padding(10.dp),
+                            verticalArrangement = Arrangement.Center
+                        ){
 
-                            for (transaction in transactionsData) {
-                                val transactionHash = transaction.values.elementAt(0)
-                                val transactionDate = transactionHash.transactionDate!!.toLong()
-                                val dateFormat = Date(transactionDate)
-                                val today = Date().time
-
-                                val todayYear = SimpleDateFormat("yyyy").format(today).toInt()
-                                val todayMonth = SimpleDateFormat("MM").format(today).toInt()
-                                val todayDay = SimpleDateFormat("dd").format(today).toInt()
-                                val todayDayInYear = SimpleDateFormat("DDD").format(today).toInt()
-
-                                val transactionYear = SimpleDateFormat("yyyy").format(dateFormat).toInt()
-                                val transactionMonth = SimpleDateFormat("MM").format(dateFormat).toInt()
-                                val transactionDay = SimpleDateFormat("dd").format(dateFormat).toInt()
-                                val transactionDayInYear = SimpleDateFormat("DDD").format(dateFormat).toInt()
-
-                                if (transactionYear == todayYear && transactionMonth == todayMonth) {
-                                    transactionsLastMonth.add(transaction.values.elementAt(0))
-                                    //Log.d("****DEBUG****", "Transaction -->" + transaction.values.elementAt(0).toString())
-                                }
-                            }
-
-                            val groupedTransactions = transactionsLastMonth
-                                .filter { it.transactionValue ?: 0.0 < 0 }
-                                .groupBy(TransactionModel::transactionType)
-
-                            val data = groupedTransactions
-                                .mapKeys { it.key!! }
-                                .mapValues { entry -> abs(entry.value.sumOf { it.transactionValue ?: 0.0 }).toInt() }
-
-                            Log.d("****DEBUG****", data.toString())
-                            PieChart(
-                                data = data
+                            Text(
+                                modifier = Modifier
+                                    .padding(0.dp),
+                                text = "Spending",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = NormalText,
                             )
+                            Text(
+                                modifier = Modifier
+                                    .padding(5.dp),
+                                text = "This month",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.W600,
+                                color = NormalText,
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(15.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                val transactionsData = data.userTransactionHistory!!
+                                val transactionsLastMonth = mutableListOf<TransactionModel>()
+
+                                for (transaction in transactionsData) {
+                                    val transactionHash = transaction.values.elementAt(0)
+                                    val transactionDate = transactionHash.transactionDate!!.toLong()
+                                    val dateFormat = Date(transactionDate)
+                                    val today = Date().time
+
+                                    val todayYear = SimpleDateFormat("yyyy").format(today).toInt()
+                                    val todayMonth = SimpleDateFormat("MM").format(today).toInt()
+                                    val todayDay = SimpleDateFormat("dd").format(today).toInt()
+                                    val todayDayInYear = SimpleDateFormat("DDD").format(today).toInt()
+
+                                    val transactionYear = SimpleDateFormat("yyyy").format(dateFormat).toInt()
+                                    val transactionMonth = SimpleDateFormat("MM").format(dateFormat).toInt()
+                                    val transactionDay = SimpleDateFormat("dd").format(dateFormat).toInt()
+                                    val transactionDayInYear = SimpleDateFormat("DDD").format(dateFormat).toInt()
+
+                                    if (transactionYear == todayYear && transactionMonth == todayMonth) {
+                                        transactionsLastMonth.add(transaction.values.elementAt(0))
+                                        //Log.d("****DEBUG****", "Transaction -->" + transaction.values.elementAt(0).toString())
+                                    }
+                                }
+
+                                val groupedTransactions = transactionsLastMonth
+                                    .filter { it.transactionValue ?: 0.0 < 0 }
+                                    .groupBy(TransactionModel::transactionType)
+
+                                val data = groupedTransactions
+                                    .mapKeys { it.key!! }
+                                    .mapValues { entry -> abs(entry.value.sumOf { it.transactionValue ?: 0.0 }).toInt() }
+
+                                //Log.d("****DEBUG****", data.toString())
+                                PieChart(
+                                    data = data
+                                )
+                            }
                         }
                     }
                 }
@@ -401,10 +427,17 @@ class HomeScreen : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
+
+                var height = 300.dp
+
+                if (data.userTransactionHistory!!.takeLast(3).reversed().size >= 2){
+                    height = 420.dp
+                }
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(420.dp)
+                        .requiredHeight(height)
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     elevation = 2.dp,
@@ -591,6 +624,23 @@ class HomeScreen : ComponentActivity() {
                     }
                 }
             }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+
+            }
         }
+    }
+
+    private fun IsAdd(value: String): Boolean {
+        var isIt = false
+        depositTransactionCategories.forEach{ type ->
+            if(type.name == value){
+                isIt = true
+            }
+        }
+        return isIt
     }
 }

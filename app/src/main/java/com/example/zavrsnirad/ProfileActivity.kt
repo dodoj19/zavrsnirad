@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.R
@@ -40,6 +41,13 @@ class ProfileActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        onBackPressedDispatcher.addCallback(this ) {
+            startActivity(Intent(this@ProfileActivity, HomeScreen::class.java))
+            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+            finishAfterTransition()
+        }
+
         setContent {
             val systemUiController = rememberSystemUiController()
 
@@ -165,6 +173,7 @@ class ProfileActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .clickable {
                         val alterProfileIntent = Intent(this@ProfileActivity, AlterProfileActivity::class.java)
+                        alterProfileIntent.putExtra("Selection", "Name")
                         startActivity(alterProfileIntent)
                     }
             ){

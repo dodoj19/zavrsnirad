@@ -139,8 +139,8 @@ fun DetailsPieChart(
     ) {
         data.values.forEachIndexed { index, value ->
 
-            Log.d("****DEBUG****", index.toString())
-            Log.d("****DEBUG****", providedColors.toString())
+            //Log.d("****DEBUG****", index.toString())
+            //Log.d("****DEBUG****", providedColors.toString())
 
             DetailsPieChartItem(
                 data = Pair(data.keys.elementAt(index), value),
