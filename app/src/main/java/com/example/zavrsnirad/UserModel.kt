@@ -1,7 +1,5 @@
 package com.example.zavrsnirad
 
-import java.io.Serializable
-
 data class UserModel(
     var userId: String? = null,
     var userName: String? = null,

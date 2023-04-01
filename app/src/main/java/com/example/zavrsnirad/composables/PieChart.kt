@@ -1,6 +1,5 @@
 package com.example.zavrsnirad.composables
 
-import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zavrsnirad.transactionsIndex
-import com.example.zavrsnirad.ui.theme.*
 
 @Composable
 fun PieChart(

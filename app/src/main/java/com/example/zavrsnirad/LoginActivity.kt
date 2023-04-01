@@ -1,5 +1,6 @@
 package com.example.zavrsnirad
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -59,6 +60,9 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun InitiateLogin(email: String, password: String){
+
+        val sharedPref = application.getSharedPreferences("UserDetails", Context.MODE_PRIVATE) ?: return
+
         if (email == ""){
             Toast.makeText(baseContext, "Your email must not be empty!", Toast.LENGTH_SHORT).show()
             return
@@ -71,6 +75,12 @@ class LoginActivity : ComponentActivity() {
 
         mAuth.signInWithEmailAndPassword(email.replace(" ", ""), password.replace(" ", ""))
             .addOnCompleteListener(this) { task ->
+
+                with (sharedPref.edit()) {
+                    putString(getString(R.string.password_key), password.replace(" ", ""))
+                    apply()
+                }
+
                 if (task.isSuccessful) {
                     Log.d("LOGINTESTTAG", "signInWithEmail:success")
                     startActivity(Intent(this@LoginActivity, HomeScreen::class.java))

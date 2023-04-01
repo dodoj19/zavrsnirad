@@ -2,9 +2,8 @@ package com.example.zavrsnirad
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
@@ -27,13 +26,8 @@ import com.example.zavrsnirad.ui.theme.BGGray
 import com.example.zavrsnirad.viewmodels.HomeViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.patrykandpatrick.vico.core.extension.getFieldValue
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,6 +37,11 @@ class AllTransactions : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        onBackPressedDispatcher.addCallback(this ) {
+            finishAffinity()
+            startActivity(Intent(this@AllTransactions, HomeScreen::class.java))
+        }
 
         setContent {
             val systemUiController = rememberSystemUiController()
@@ -73,13 +72,13 @@ class AllTransactions : ComponentActivity() {
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = null,
                             tint = Color.DarkGray,
-                            modifier = Modifier.size(42.dp)
+                            modifier = Modifier.size(58.dp)
                         )
                     }
 
                     Spacer(Modifier.width(10.dp))
 
-                    Text(text = "All transactions", color = Color.DarkGray, fontSize = 38.sp)
+                    Text(text = "All transactions", color = Color.DarkGray, fontSize = 42.sp)
                 }
 
                 Spacer(Modifier.height(25.dp))
@@ -296,9 +295,8 @@ class AllTransactions : ComponentActivity() {
         }
         val trans = mDatabase.getReference("Users").child(user.uid).child("userTransactionHistory").child(transactionKey)
         trans.removeValue().addOnCompleteListener {
-            finish()
+            finishAffinity()
             startActivity(intent)
-            overridePendingTransition(0, 0)
         }
     }
 

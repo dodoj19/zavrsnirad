@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.DatePicker
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -21,8 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zavrsnirad.sealed.DataState
@@ -59,9 +57,9 @@ class BalanceChange : ComponentActivity() {
         transactionType = intent.extras!!.getString("TransactionType")!!
 
         onBackPressedDispatcher.addCallback(this ) {
+            finishAffinity()
             startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
             overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
-            finishAfterTransition()
         }
 
         setContent{
@@ -343,7 +341,7 @@ class BalanceChange : ComponentActivity() {
                             border = BorderStroke(2.dp, Color.Magenta),
                             onClick = {
                                 mDate.value = SimpleDateFormat("dd/MM/yyyy").format(Date())
-                                Toast.makeText(this@BalanceChange, Date().toString(), Toast.LENGTH_SHORT).show()
+                                //Toast.makeText(this@BalanceChange, Date().toString(), Toast.LENGTH_SHORT).show()
                             },
                             shape = RoundedCornerShape(20.dp)
                         ) {
@@ -379,7 +377,7 @@ class BalanceChange : ComponentActivity() {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeight(260.dp)
+                    .wrapContentHeight()
                     .padding(10.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = 2.dp,
@@ -414,7 +412,7 @@ class BalanceChange : ComponentActivity() {
                         items(transactionList.size){ index ->
                                 Button(
                                     modifier = Modifier
-                                        .fillMaxHeight()
+                                        .requiredHeight(150.dp)
                                         .requiredWidth(150.dp)
                                         .padding(horizontal = 5.dp),
                                     shape = RoundedCornerShape(24.dp),
@@ -464,6 +462,7 @@ class BalanceChange : ComponentActivity() {
                                             fontSize = categoryCardTextSize,
                                             fontWeight = FontWeight.Black,
                                             color = Color.White,
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
@@ -554,58 +553,7 @@ class BalanceChange : ComponentActivity() {
                         backgroundColor = Color(0xFF04AA6D)
                     ),
                     onClick = {
-                        var checkAmount = newAmount.text.toDoubleOrNull()
-                        if (checkAmount != null && category.value != "" && transName.text != null){
-                            if (IsAdd(category.value))
-                                checkAmount = Math.abs(checkAmount)
-                            else
-                                checkAmount = -Math.abs(checkAmount)
-
-                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            val date = LocalDate.parse(mDate.value, formatter)
-                            val transaction = TransactionModel(
-                                transactionName = transName.text,
-                                transactionType = category.value,
-                                transactionValue = checkAmount,
-                                transactionDate = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString(),
-                                balanceAfterTransaction = data.userBalance!! + checkAmount
-                            )
-                            val auth = Firebase.auth
-                            val user = auth.currentUser
-                            val database = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
-                            val dbRef = database.getReference("Users")
-                            val tempData = dbRef.get().addOnSuccessListener {temp ->
-                                val key = (temp.child(user!!.uid).child("userTransactionHistory").childrenCount+1)
-                                val currentUserModel = UserModel()
-                                currentUserModel.userName = temp.child("userName").getValue(String::class.java)
-                                currentUserModel.userGender = temp.child("userGender").getValue(String::class.java)
-                                currentUserModel.userJoin = temp.child("userName").getValue(String::class.java)
-                                currentUserModel.userId = temp.child("userName").getValue(String::class.java)
-                                currentUserModel.userBalance = temp.child("userBalance").getValue(Double::class.java)
-                                val listA = mutableListOf<LinkedHashMap<String, TransactionModel>>()
-                                for (ds in temp.child("userTransactionHistory").children) {
-                                    val snapshotKey = ds.key!!
-                                    val transaction: TransactionModel? = ds.getValue(TransactionModel::class.java)
-                                    if (transaction != null) {
-                                        val hashA = linkedMapOf(Pair(snapshotKey, transaction))
-                                        listA.add(hashA)
-                                    }
-                                }
-                                currentUserModel.userTransactionHistory = listA
-                                dbRef.child(user.uid).child("userTransactionHistory").child(key.toString()).setValue(transaction)
-                                    .addOnCompleteListener {
-                                        val balReference = dbRef.child(user.uid).child("userBalance")
-                                        balReference.setValue(data.userBalance!! + checkAmount).addOnCompleteListener {
-                                            startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
-                                            overridePendingTransition(
-                                                com.google.android.material.R.anim.abc_popup_enter,
-                                                com.google.android.material.R.anim.abc_popup_exit
-                                            )
-                                            finishAfterTransition()
-                                        }
-                                    }
-                            }
-                        }
+                        ChangeBalance(newAmount, category, transName, mDate, data)
                     }
                 ) {
                     Text(
@@ -618,6 +566,88 @@ class BalanceChange : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun ChangeBalance(
+        newAmount: TextFieldValue,
+        category: MutableState<String>,
+        transName: TextFieldValue,
+        mDate: MutableState<String>,
+        data: UserModel
+    ) {
+        var checkAmount = newAmount.text.toDoubleOrNull()
+        if (checkAmount != null && category.value != "" && transName.text != null){
+            if (IsAdd(category.value))
+                checkAmount = Math.abs(checkAmount)
+            else
+                checkAmount = -Math.abs(checkAmount)
+
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            val date = LocalDate.parse(mDate.value, formatter)
+            val transaction = TransactionModel(
+                transactionName = transName.text,
+                transactionType = category.value,
+                transactionValue = checkAmount,
+                transactionDate = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli().toString(),
+                balanceAfterTransaction = data.userBalance!! + checkAmount
+            )
+            val auth = Firebase.auth
+            val user = auth.currentUser
+            val database = Firebase.database("https://zavrsnirad-1e613-default-rtdb.europe-west1.firebasedatabase.app/")
+            val dbRef = database.getReference("Users")
+            dbRef.get().addOnSuccessListener {temp ->
+
+                val userTransactionHistorySnapshot = temp.child(user!!.uid).child("userTransactionHistory")
+                val list = mutableListOf<Int>()
+                var key = 0
+
+                for (transSnapshot in userTransactionHistorySnapshot.children){
+                    val transKey = transSnapshot.key
+                    transKey?.let {
+                        list.add(it.toInt())
+                    }
+                }
+
+                list.maxOrNull()?.let{
+                    key = it + 1
+                    Log.d("****DEBUG****", key.toString())
+                }
+
+                val currentUserModel = UserModel()
+                currentUserModel.userName = temp.child("userName").getValue(String::class.java)
+                currentUserModel.userGender = temp.child("userGender").getValue(String::class.java)
+                currentUserModel.userJoin = temp.child("userName").getValue(String::class.java)
+                currentUserModel.userId = temp.child("userName").getValue(String::class.java)
+                currentUserModel.userBalance = temp.child("userBalance").getValue(Double::class.java)
+
+                val listA = mutableListOf<LinkedHashMap<String, TransactionModel>>()
+                for (ds in temp.child("userTransactionHistory").children) {
+                    val snapshotKey = ds.key!!
+                    val transModel: TransactionModel? = ds.getValue(TransactionModel::class.java)
+                    if (transModel != null) {
+                        listA.add(linkedMapOf(Pair(snapshotKey, transModel)))
+                    }
+                }
+                currentUserModel.userTransactionHistory = listA
+
+                dbRef.child(user.uid).child("userTransactionHistory").child(key.toString()).setValue(transaction)
+                    .addOnCompleteListener {
+                        val balReference = dbRef.child(user.uid).child("userBalance")
+                        balReference.setValue(data.userBalance!! + checkAmount).addOnCompleteListener {
+                            startActivity(Intent(this@BalanceChange, HomeScreen::class.java))
+                            overridePendingTransition(
+                                com.google.android.material.R.anim.abc_popup_enter,
+                                com.google.android.material.R.anim.abc_popup_exit
+                            )
+                            finishAfterTransition()
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun findMax(list: List<Int>): Int? {
+        return list.max()
     }
 
     private fun IsAdd(value: String): Boolean {

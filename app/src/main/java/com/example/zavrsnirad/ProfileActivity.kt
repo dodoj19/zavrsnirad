@@ -2,28 +2,26 @@ package com.example.zavrsnirad
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.R
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zavrsnirad.sealed.DataState
@@ -32,7 +30,6 @@ import com.example.zavrsnirad.viewmodels.HomeViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 class ProfileActivity : ComponentActivity() {
@@ -43,9 +40,8 @@ class ProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(this ) {
+            finishAffinity()
             startActivity(Intent(this@ProfileActivity, HomeScreen::class.java))
-            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
-            finishAfterTransition()
         }
 
         setContent {
@@ -77,8 +73,8 @@ class ProfileActivity : ComponentActivity() {
                     ){
                         IconButton(
                             onClick = {
+                                finishAffinity()
                                 startActivity(Intent(this@ProfileActivity, HomeScreen::class.java))
-                                finish()
                             }
                         ){
                             Icon(
@@ -174,6 +170,7 @@ class ProfileActivity : ComponentActivity() {
                     .clickable {
                         val alterProfileIntent = Intent(this@ProfileActivity, AlterProfileActivity::class.java)
                         alterProfileIntent.putExtra("Selection", "Name")
+                        finishAffinity()
                         startActivity(alterProfileIntent)
                     }
             ){
@@ -226,6 +223,12 @@ class ProfileActivity : ComponentActivity() {
                 modifier = Modifier
                     .requiredHeight(90.dp)
                     .fillMaxWidth()
+                    .clickable {
+                        val alterProfileIntent = Intent(this@ProfileActivity, AlterProfileActivity::class.java)
+                        alterProfileIntent.putExtra("Selection", "Gender")
+                        finishAffinity()
+                        startActivity(alterProfileIntent)
+                    }
             ){
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -276,6 +279,12 @@ class ProfileActivity : ComponentActivity() {
                 modifier = Modifier
                     .requiredHeight(90.dp)
                     .fillMaxWidth()
+                    .clickable {
+                        val alterProfileIntent = Intent(this@ProfileActivity, AlterProfileActivity::class.java)
+                        alterProfileIntent.putExtra("Selection", "Email")
+                        finishAffinity()
+                        startActivity(alterProfileIntent)
+                    }
             ){
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -327,6 +336,12 @@ class ProfileActivity : ComponentActivity() {
                 modifier = Modifier
                     .requiredHeight(90.dp)
                     .fillMaxWidth()
+                    .clickable {
+                        val alterProfileIntent = Intent(this@ProfileActivity, AlterProfileActivity::class.java)
+                        alterProfileIntent.putExtra("Selection", "Password")
+                        finishAffinity()
+                        startActivity(alterProfileIntent)
+                    }
             ){
                 Column(
                     modifier = Modifier.fillMaxSize(),

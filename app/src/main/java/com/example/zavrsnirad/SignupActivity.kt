@@ -1,5 +1,6 @@
 package com.example.zavrsnirad
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -80,6 +81,9 @@ class SignupActivity : ComponentActivity() {
     }
 
     private fun initiateAccountCreation(email: String, password: String, passwordConfirm: String){
+
+        val sharedPref = application.getSharedPreferences("UserDetails", Context.MODE_PRIVATE) ?: return
+
         // Formation check
         if (email == ""){
             Toast.makeText(baseContext, "Your email must not be empty!", Toast.LENGTH_SHORT).show()
@@ -103,6 +107,12 @@ class SignupActivity : ComponentActivity() {
 
         auth.createUserWithEmailAndPassword(email.replace(" ", ""), password.replace(" ", "")).addOnCompleteListener(this){ task ->
             if(task.isSuccessful){
+
+                // Save password
+                with (sharedPref.edit()) {
+                    putString(getString(R.string.password_key), password.replace(" ", ""))
+                    apply()
+                }
 
                 user = auth.currentUser!!
 
@@ -253,7 +263,8 @@ class SignupActivity : ComponentActivity() {
 
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
-                        onClick = { initiateAccountCreation(emailtxt.text, password, confirmPassword) },
+                        onClick = {
+                            initiateAccountCreation(emailtxt.text, password, confirmPassword) },
                     ){
 
                         Text(

@@ -29,7 +29,7 @@ val withdrawTransactionCategories = listOf(
 val depositTransactionCategories = listOf(
     TransactionType("INCOME", "\uD83E\uDE99", Color(0xFFFFA84B), Color(0xFFFFCA91)),
     TransactionType("PASSIVE INCOME", "\uD83C\uDFE6", Color(0xFFFF4B8A), Color(0xFFFF91DA)),
-    TransactionType("OTHER", "\uD83D\uDCCB", Color(0xFF797979), Color(0xFFB6B6B6)),
+    TransactionType("OTHER INCOME", "\uD83D\uDCCB", Color(0xFF797979), Color(0xFFB6B6B6)),
 )
 
 val transactionsIndex = depositTransactionCategories + withdrawTransactionCategories

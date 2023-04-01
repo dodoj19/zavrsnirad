@@ -8,7 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,15 +16,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,11 +41,6 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.alpha
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -144,8 +134,6 @@ class HomeScreen : ComponentActivity() {
             val transDate = Date(checkHash.transactionDate!!.toLong())
             val transDateString = checkFormatter.format(transDate).toString()
 
-            //Log.d("****DEBUG****", transDateString)
-
             val transDateParsed = checkFormatter.parse(transDateString)
             val transYear = SimpleDateFormat("yyyy").format(transDateParsed!!).toInt()
             val transMonth = SimpleDateFormat("MM").format(transDateParsed!!).toInt()
@@ -154,7 +142,9 @@ class HomeScreen : ComponentActivity() {
             val todayMonth = SimpleDateFormat("MM").format(Date().time).toInt()
 
             if ((todayYear == transYear) && (todayMonth == transMonth) && (!IsAdd(checkHash.transactionType!!))){
+                Log.d("****DEBUG****", "Found match for transaction last month!")
                 hasSpendingRecordLastMonth = true;
+                return@forEach
             }
         }
 
@@ -174,11 +164,8 @@ class HomeScreen : ComponentActivity() {
                 IconButton(
                     onClick = {
                         val newIntent = Intent(this@HomeScreen, ProfileActivity::class.java)
+                        finishAffinity()
                         startActivity(newIntent)
-                        overridePendingTransition(
-                            com.google.android.material.R.anim.abc_popup_enter,
-                            com.google.android.material.R.anim.abc_popup_exit
-                        )
                     }) {
                     Icon(
                         Icons.Filled.AccountCircle,
@@ -406,7 +393,7 @@ class HomeScreen : ComponentActivity() {
                                 }
 
                                 val groupedTransactions = transactionsLastMonth
-                                    .filter { it.transactionValue ?: 0.0 < 0 }
+                                    .filter { (it.transactionValue ?: 0.0) < 0 }
                                     .groupBy(TransactionModel::transactionType)
 
                                 val data = groupedTransactions
@@ -483,6 +470,7 @@ class HomeScreen : ComponentActivity() {
                                 colors = ButtonDefaults.buttonColors(backgroundColor = BGGray, contentColor = Color.LightGray),
                                 onClick = {
                                     startActivity(Intent(this@HomeScreen, AllTransactions::class.java))
+                                    finishAffinity()
                                 }
                             ) {
                                 Text(

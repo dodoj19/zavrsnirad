@@ -16,44 +16,36 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.DayNight"
+        android:theme="@style/Theme.Material3.Light"
         android:windowSoftInputMode="adjustPan"
         tools:targetApi="31">
         <activity
             android:name=".AlterProfileActivity"
             android:exported="false"
-            android:label="@string/title_activity_alter_profile"
-            android:theme="@style/Theme.AppCompat.DayNight" />
+            android:label="@string/title_activity_alter_profile" />
         <activity
             android:name=".AllTransactions"
             android:exported="false"
-            android:label="@string/title_activity_all_transactions"
-            android:theme="@style/Theme.AppCompat.DayNight" />
+            android:label="@string/title_activity_all_transactions" />
         <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:label="@string/title_activity_profile"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.zavrsnirad" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".BalanceChange"
             android:exported="false"
             android:label="@string/title_activity_balance_change"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.zavrsnirad" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".TermsAndServices"
             android:exported="false"
             android:label="Terms and Services"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.zavrsnirad" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ResetPassword"
             android:exported="false"
             android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".LoginActivity"
@@ -61,9 +53,6 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".SignupActivity"
@@ -71,9 +60,6 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".SplashScreen"
@@ -85,10 +71,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".HomeScreen"
@@ -100,5 +82,4 @@
                 android:value="" />
         </activity>
     </application>
-
 </manifest>
